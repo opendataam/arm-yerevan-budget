@@ -1,0 +1,39 @@
+[project]
+name = "yerevan-budget"
+version = "0.1.0"
+description = "Collector and DuckDB database of the Yerevan city budget documents published by the Yerevan Municipality (yerevan.am/hy/finance)"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "duckdb>=1.1",
+    "fonttools>=4.40",
+    "lxml>=5.0",
+    "openpyxl>=3.1",
+    "pandas>=2.0",
+    "pdfplumber>=0.11",
+    "pymupdf>=1.24",
+    "requests>=2.31",
+    "xlrd>=2.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.5"]
+notebook = ["jupyterlab>=4", "matplotlib>=3.8", "nbclient>=0.10", "nbformat>=5.9", "ipykernel>=6"]
+
+[project.scripts]
+yerevan-budget = "yerevan_budget.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py310"
