@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where Yerevan's Money Goes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .top-list { display: grid; gap: 10px; }
+  .top-item { display: grid; gap: 4px; cursor: pointer; border-radius: 6px; padding: 4px 6px; margin: 0 -6px; background: none; border: 0; text-align: left; font: inherit; color: inherit; }
+  .top-item:hover { background: var(--hover); }
+  .top-item .row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
+  .top-item .row b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .top-item .meta { font-size: 11.5px; color: var(--muted); }
+  .bar { height: 6px; border-radius: 3px; background: var(--line); }
+  .bar > span { display: block; height: 100%; border-radius: 3px; }
+  .search { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .search input { min-width: min(100%, 280px); }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="page-head">
+    <h1>Where the money goes</h1>
+    <p class="lede">Every dram of the approved budget, nested from function to sub-function to programme. Click a block to zoom in, use the path below the map to step back.</p>
+    <div class="pattern">
+      <span><b>Pattern:</b> drill-down treemap and sunburst, as in OpenSpending Viewer, Civio Presupuesto and the USAspending Spending Explorer</span>
+      <span class="chip">ECharts treemap · sunburst</span>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter"><span>Budget year</span><span id="f-year"></span></div>
+    <div class="filter"><span>View</span><span id="f-view"></span></div>
+  </div>
+
+  <div class="grid grid-3">
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2 id="map-title">Approved budget</h2>
+          <p id="map-sub"></p>
+        </div>
+      </div>
+      <div class="chart xtall" id="c-map" role="img" aria-label="Treemap of the approved budget by function, sub-function and programme"></div>
+      <p class="note" id="map-note"></p>
+    </section>
+    <aside class="card">
+      <div class="card-head"><div><h2>Largest programmes</h2><p>Click one to find it in the map.</p></div></div>
+      <div class="top-list" id="top"></div>
+    </aside>
+  </div>
+
+  <section class="card">
+    <div class="card-head">
+      <div><h2>All programmes</h2><p>The same figures as a searchable table.</p></div>
+      <div class="search"><label for="q">Search</label><input type="search" id="q" placeholder="e.g. metro, kindergarten, waste"></div>
+    </div>
+    <div class="table-wrap" id="tbl"></div>
+  </section>
+</main>
+
+<script src="data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<script src="assets/common.js"></script>
+<script>
+(function () {
+  const { B, css, el, amd, short, pct, esc, base, chart, seg, table, sectionColor } = YB;
+  YB.header("treemap.html");
+
+  let year = "2026", view = "treemap", focus = null;
+
+  /* gross allocations: negative programme lines (asset-sale proceeds) are left out of the map */
+  function build(y) {
+    let neg = 0;
+    const secs = B.hierarchy[y].map((s) => {
+      const classes = s.children.map((c) => {
+        const progs = c.children.filter((p) => { if (p.total < 0) neg += p.total; return p.total > 0; })
+          .map((p) => ({ name: p.name, value: p.total, path: [s.name, c.name, p.name], code: c.code, sec: s.code }));
+        let v = progs.reduce((a, p) => a + p.value, 0);
+        if (!progs.length && c.total > 0) v = c.total;
+        return { name: c.name, value: v, code: c.code, sec: s.code, children: progs.length ? progs : undefined };
+      }).filter((c) => c.value > 0);
+      return { name: s.name, code: s.code, value: classes.reduce((a, c) => a + c.value, 0), children: classes };
+    }).filter((s) => s.value > 0).sort((a, b) => b.value - a.value);
+    const gross = secs.reduce((a, s) => a + s.value, 0);
+    return { secs, gross, neg };
+  }
+
+  const inkOn = (code) => (["05"].includes(code) ? "#0b0b0b" : "#ffffff");
+
+  function decorate(secs) {
+    return secs.map((s) => ({
+      name: s.name, value: s.value, id: s.code,
+      itemStyle: { color: sectionColor(s.code), borderColor: sectionColor(s.code) },
+      label: { color: inkOn(s.code) }, upperLabel: { color: inkOn(s.code) },
+      children: s.children.map((c) => ({
+        name: c.name, value: c.value, id: c.code,
+        children: c.children ? c.children.map((p, i) => ({ name: p.name, value: p.value, id: `${c.code}#${i}` })) : undefined,
+      })),
+    }));
+  }
+
+  function tooltip(info, gross) {
+    const path = (info.treePathInfo || []).slice(1).map((t) => t.name);
+    const parent = info.treePathInfo && info.treePathInfo.length > 2 ? info.treePathInfo[info.treePathInfo.length - 2].value : null;
+    return `<div style="max-width:280px;white-space:normal">` +
+      `<div style="color:${css("--muted")};font-size:11.5px">${path.slice(0, -1).map(esc).join(" › ")}</div>` +
+      `<div style="font-weight:650;margin:2px 0">${esc(info.name)}</div>` +
+      `<b style="font-size:15px;font-variant-numeric:tabular-nums">${esc(amd(info.value))}</b>` +
+      `<span style="color:${css("--ink-2")}"> · ${pct(info.value / gross, 1)} of the budget` +
+      (parent && path.length > 1 ? ` · ${pct(info.value / parent)} of the level above` : "") + `</span></div>`;
+  }
+
+  function option() {
+    const { secs, gross } = build(year);
+    const data = decorate(secs);
+    const o = base();
+    o.tooltip = Object.assign(o.tooltip, { formatter: (info) => tooltip(info, gross) });
+    const surface = css("--surface");
+    if (view === "treemap") {
+      o.series = [{
+        type: "treemap", name: "All functions", data, roam: false, nodeClick: "zoomToNode", leafDepth: 2,
+        top: 4, left: 0, right: 0, bottom: 34, squareRatio: 0.9,
+        breadcrumb: {
+          show: true, bottom: 0, left: 0, height: 24,
+          itemStyle: { color: css("--accent-soft"), borderColor: css("--surface"), textStyle: { color: css("--accent"), fontWeight: 600 } },
+          emphasis: { itemStyle: { color: css("--accent"), textStyle: { color: surface } } },
+        },
+        label: { show: true, fontSize: 12, lineHeight: 16, overflow: "break", position: "insideTopLeft",
+          formatter: (p) => `${p.name}\n${short(p.value)}` },
+        upperLabel: { show: false },
+        levels: [
+          { itemStyle: { borderColor: surface, borderWidth: 0, gapWidth: 4 } },
+          { itemStyle: { borderWidth: 3, gapWidth: 2 },
+            upperLabel: { show: true, height: 24, fontWeight: 700, fontSize: 12.5, overflow: "truncate",
+              formatter: (p) => `${p.name}  ·  ${short(p.value)}` } },
+          { itemStyle: { borderColor: surface, borderWidth: 0, gapWidth: 2 }, upperLabel: { show: false } },
+          { itemStyle: { borderColor: surface, borderWidth: 0, gapWidth: 1 }, upperLabel: { show: false } },
+        ],
+      }];
+    } else {
+      o.series = [{
+        type: "sunburst", data, radius: [0, "96%"], center: ["50%", "50%"], sort: (a, b) => b.getValue() - a.getValue(),
+        nodeClick: "rootToNode",
+        itemStyle: { borderColor: surface, borderWidth: 2 },
+        label: { color: css("--ink"), fontSize: 11.5, minAngle: 8 },
+        levels: [
+          {},
+          { r0: "12%", r: "44%", label: { rotate: "tangential", fontWeight: 650, minAngle: 10, overflow: "truncate", width: 120 } },
+          { r0: "44%", r: "72%", label: { rotate: "radial", align: "center", minAngle: 6, overflow: "truncate", width: 90 },
+            itemStyle: { opacity: 0.82 } },
+          { r0: "72%", r: "96%", label: { show: false }, itemStyle: { opacity: 0.62 } },
+        ],
+      }];
+      o.graphic = [{ type: "text", left: "center", top: "middle", silent: true,
+        style: { text: `AMD\n${(gross / 1000).toFixed(1)} bn`, align: "center", fill: css("--ink"), font: `700 15px ${css("--font-body")}` } }];
+    }
+    return o;
+  }
+
+  const mapNode = document.getElementById("c-map");
+  const m = chart(mapNode, option);
+
+  function render() {
+    const { secs, gross, neg } = build(year);
+    m.render();
+    document.getElementById("map-title").textContent = `${year === "2026" ? "Approved budget 2026" : `Approved budget ${year}`}`;
+    document.getElementById("map-sub").textContent =
+      `Gross allocations: ${amd(gross)}. Sizes are proportional to money; colours follow the ten budget functions.`;
+    const note = document.getElementById("map-note");
+    note.replaceChildren(el("b", { text: "Offsets: " }),
+      `the budget books ${amd(-neg)} of land and property sale proceeds as negative spending under “Economic affairs n.e.c.”. ` +
+      `The map leaves them out, so it adds up to ${amd(gross)} rather than the net ${amd(gross + neg)}.`);
+
+    /* top programmes */
+    const progs = [];
+    for (const s of secs) for (const c of s.children) {
+      if (c.children) for (const p of c.children) progs.push(Object.assign({}, p, { sec: s.code, secName: s.name, cls: c.name }));
+      else progs.push({ name: c.name, value: c.value, sec: s.code, secName: s.name, cls: c.name, code: c.code });
+    }
+    progs.sort((a, b) => b.value - a.value);
+    const top = document.getElementById("top");
+    top.replaceChildren();
+    const max = progs[0].value;
+    for (const p of progs.slice(0, 10)) {
+      const b = el("button", { class: "top-item", type: "button", title: p.name }, [
+        el("div", { class: "row" }, [el("span", { text: p.name }), el("b", { text: short(p.value) })]),
+        el("div", { class: "bar" }, el("span", { style: `width:${p.value / max * 100}%;background:${sectionColor(p.sec)}` })),
+        el("div", { class: "meta", text: `${p.secName} › ${p.cls}` }),
+      ]);
+      b.addEventListener("click", () => {
+        if (view !== "treemap") return;
+        m.chart.dispatchAction({ type: "treemapZoomToNode", targetNodeId: p.code });
+        mapNode.scrollIntoView({ behavior: YB.reduced() ? "auto" : "smooth", block: "center" });
+      });
+      top.append(b);
+    }
+
+    /* table */
+    allRows = progs.map((p) => ({ fn: p.secName, sub: p.cls, name: p.name, value: p.value, share: p.value / gross }));
+    fillTable();
+  }
+
+  let allRows = [];
+  const tbl = document.getElementById("tbl");
+  const q = document.getElementById("q");
+  function fillTable() {
+    const needle = q.value.trim().toLowerCase();
+    const rows = needle ? allRows.filter((r) => `${r.fn} ${r.sub} ${r.name}`.toLowerCase().includes(needle)) : allRows;
+    table(tbl, [
+      { key: "name", label: "Programme" },
+      { key: "sub", label: "Sub-function" },
+      { key: "fn", label: "Function" },
+      { key: "value", label: "AMD", num: true, fmt: short },
+      { key: "share", label: "Share", num: true, fmt: (v) => pct(v, 1) },
+    ], rows);
+  }
+  q.addEventListener("input", fillTable);
+
+  seg(document.getElementById("f-year"), [["2024", "2024"], ["2025", "2025"], ["2026", "2026"]], year, (v) => { year = v; render(); }, "Budget year");
+  seg(document.getElementById("f-view"), [["treemap", "Treemap"], ["sunburst", "Sunburst"]], view, (v) => { view = v; render(); }, "View");
+  render();
+})();
+</script>
+</body>
+</html>

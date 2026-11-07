@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yerevan Budget at a Glance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .econ { display: grid; gap: 0; }
+  .econ-row {
+    display: grid; grid-template-columns: minmax(150px, 1.3fr) minmax(140px, 2fr) 92px 70px; gap: 14px;
+    align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line);
+  }
+  .econ-row:last-child { border-bottom: 0; }
+  .econ-row.head { font-size: 12px; color: var(--muted); padding-top: 0; }
+  .econ-name { font-size: 13.5px; font-weight: 550; }
+  .econ-val { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .econ-share { text-align: right; color: var(--ink-2); font-variant-numeric: tabular-nums; font-size: 13px; }
+  .spark { width: 100%; height: 34px; display: block; }
+  .spark rect { fill: var(--q4); }
+  .spark rect.neg { fill: var(--muted); }
+  .spark rect.last { fill: var(--q6); }
+  .spark rect.na { fill: var(--line); }
+  @media (max-width: 560px) {
+    .econ-row { grid-template-columns: 1fr 72px; }
+    .econ-row .spark-cell { grid-column: 1 / -1; order: 3; }
+    .econ-share { display: none; }
+    .econ-row.head { display: none; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="page-head">
+    <h1>Yerevan budget at a glance</h1>
+    <p class="lede">Ten years of the city budget on one screen: what the Council approved, what was collected and spent, and how spending splits between city functions.</p>
+    <div class="pattern">
+      <span><b>Pattern:</b> portal landing page with headline figures and trends, as in Gobierto and USAspending agency profiles</span>
+      <span class="chip">Apache ECharts</span>
+    </div>
+  </div>
+
+  <section class="tiles" id="tiles" aria-label="Headline figures"></section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Revenue and spending, 2017–2026</h2>
+        <p>AMD billion. Approved budget, revised plan and actual result of each year. 2026 shows the approved budget only.</p>
+      </div>
+      <button class="toggle-table" type="button" id="t1-btn" aria-expanded="false">Show table</button>
+    </div>
+    <div class="legend" id="legend-lines"></div>
+    <div class="grid grid-2">
+      <div><h3>Revenue</h3><div class="chart" id="c-rev" role="img" aria-label="Line chart of revenue by year"></div></div>
+      <div><h3>Spending</h3><div class="chart" id="c-exp" role="img" aria-label="Line chart of spending by year"></div></div>
+    </div>
+    <div class="table-wrap" id="t1" hidden></div>
+    <p class="note"><b>Gaps:</b> the 2020 annual report has no revenue table, so 2020 revenue execution is missing. Revised plans can exceed the approved budget when the Council adds the previous year's free balance.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Spending by function</h2>
+        <p>Actual spending 2017–2025, approved budget for 2026. Functional classification of the budget, first level.</p>
+      </div>
+      <div class="filters">
+        <div id="mode"></div>
+        <button class="toggle-table" type="button" id="t2-btn" aria-expanded="false">Show table</button>
+      </div>
+    </div>
+    <div class="legend" id="legend-func"></div>
+    <div class="chart tall" id="c-func" role="img" aria-label="Stacked bar chart of spending by function and year"></div>
+    <div class="table-wrap" id="t2" hidden></div>
+    <p class="note"><b>Economic affairs</b> is mostly transport: public bus and trolleybus services, metro, roads. <b>Other</b> joins health, defence, public order and reserve funds (under 1% together).</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>What the money buys</h2>
+        <p>Economic classification. Bars: 2017–2026, each row on its own scale; 2020 is missing in the source. Values: 2026 approved budget.</p>
+      </div>
+    </div>
+    <div class="econ" id="econ"></div>
+    <p class="note"><b>Subsidies</b> go to the city's own non-commercial organisations (transport companies, kindergartens, waste collection, culture), which is why they dominate. Sales of land and property are booked as negative spending.</p>
+  </section>
+</main>
+
+<script src="data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<script src="assets/common.js"></script>
+<script>
+(function () {
+  const { B, css, el, amd, short, pct, dram, esc, base, axis, chart, tipRow, seg, table, tableToggle, sectionColor, sectionName } = YB;
+  YB.header("overview.html");
+
+  const S = Object.fromEntries(B.summary.map((r) => [r.year, r]));
+  const years = B.summary.map((r) => r.year);
+  const approvedOf = (r, k) => (r[k + "_budget"] != null ? r[k + "_budget"] : r[k + "_approved"]);
+
+  /* tiles */
+  const pop = Object.values(B.population_2022).reduce((a, b) => a + b, 0);
+  const e26 = S[2026].expenditure_budget, r26 = S[2026].revenue_budget, e25 = S[2025].expenditure_budget;
+  const p9 = B.periods.find((p) => p.year === 2026 && p.period === "9M" && p.statement === "expenditure");
+  const tiles = [
+    { label: "2026 approved spending", value: (e26 / 1000).toFixed(1), unit: "bn AMD",
+      sub: `${e26 >= e25 ? "+" : "−"}${pct(Math.abs(e26 / e25 - 1), 1)} vs 2025 approved budget` },
+    { label: "2026 approved revenue", value: (r26 / 1000).toFixed(1), unit: "bn AMD",
+      sub: `${amd(e26 - r26)} deficit covered by financing` },
+    { label: "Spent in January–September 2026", value: pct(p9.actual / p9.revised), unit: "",
+      sub: `${amd(p9.actual)} of the ${amd(p9.revised)} revised plan`, meter: p9.actual / p9.revised },
+    { label: "Spending per resident, 2026", value: dram(e26 * 1e6 / pop), unit: "AMD",
+      sub: `about AMD ${dram(e26 * 1e6 / pop / 365)} a day · ${dram(pop)} residents (2022 census)` },
+  ];
+  const tilesNode = document.getElementById("tiles");
+  for (const t of tiles) {
+    const v = el("div", { class: "tile-value" }, [t.value, t.unit ? el("small", { text: t.unit }) : null]);
+    const kids = [el("div", { class: "tile-label", text: t.label }), v, el("div", { class: "tile-sub", text: t.sub })];
+    if (t.meter != null) kids.push(el("div", { class: "meter", "aria-hidden": "true" }, el("span", { style: `width:${Math.min(100, t.meter * 100)}%` })));
+    tilesNode.append(el("div", { class: "tile" }, kids));
+  }
+
+  /* revenue & spending lines */
+  const LINES = [
+    { key: "actual", label: "Actual", color: "--s1" },
+    { key: "approved", label: "Approved budget", color: "--s3" },
+    { key: "revised", label: "Revised plan", color: "--s2" },
+  ];
+  const leg = document.getElementById("legend-lines");
+  for (const l of LINES) leg.append(el("span", null, [el("i", { class: "line", style: `background:var(${l.color})` }), l.label]));
+
+  const seriesFor = (kind) => ({
+    actual: years.map((y) => S[y][kind + "_actual"]),
+    approved: years.map((y) => approvedOf(S[y], kind)),
+    revised: years.map((y) => S[y][kind + "_revised"]),
+  });
+  const yMax = Math.ceil(Math.max(...B.summary.flatMap((r) => [r.revenue_budget, r.revenue_revised, r.revenue_actual,
+    r.expenditure_budget, r.expenditure_revised, r.expenditure_actual].filter((v) => v != null))) / 20000) * 20000;
+
+  function lineOption(kind) {
+    const data = seriesFor(kind);
+    return Object.assign(base(), {
+      grid: { left: 44, right: 70, top: 16, bottom: 28 },
+      tooltip: Object.assign(base().tooltip, {
+        trigger: "axis",
+        axisPointer: { type: "line", lineStyle: { color: css("--axis") } },
+        formatter: (ps) => `<div style="font-weight:600;margin-bottom:2px">${esc(ps[0].axisValue)}</div>` +
+          ps.map((p) => tipRow(p.color, p.value == null ? "n/a" : amd(p.value), p.seriesName)).join(""),
+      }),
+      xAxis: axis({ type: "category", data: years.map(String), boundaryGap: false, splitLine: { show: false } }),
+      yAxis: axis({ type: "value", min: 0, max: yMax, interval: 40000, axisLine: { show: false },
+        axisLabel: { color: css("--muted"), formatter: (v) => `${v / 1000}` } }),
+      series: LINES.map((l) => {
+        const vals = data[l.key];
+        let last = -1; vals.forEach((v, i) => { if (v != null) last = i; });
+        return {
+          name: l.label, type: "line", connectNulls: false, symbol: "circle", symbolSize: 7, showSymbol: true,
+          lineStyle: { width: 2, color: css(l.color) }, itemStyle: { color: css(l.color), borderColor: css("--surface"), borderWidth: 2 },
+          z: l.key === "actual" ? 3 : 2,
+          emphasis: { focus: "series" },
+          data: vals.map((v, i) => (l.key === "actual" && i === last)
+            ? { value: v, label: { show: true, position: "right", distance: 8, color: css("--ink"), fontWeight: 650, formatter: () => short(v) } }
+            : v),
+        };
+      }),
+    });
+  }
+  chart(document.getElementById("c-rev"), () => lineOption("revenue"));
+  chart(document.getElementById("c-exp"), () => lineOption("expenditure"));
+
+  const t1 = document.getElementById("t1");
+  tableToggle(document.getElementById("t1-btn"), t1, () => table(t1, [
+    { key: "year", label: "Year" },
+    { key: "ra", label: "Revenue, approved", num: true, fmt: short },
+    { key: "rr", label: "Revenue, revised", num: true, fmt: short },
+    { key: "rx", label: "Revenue, actual", num: true, fmt: short },
+    { key: "ea", label: "Spending, approved", num: true, fmt: short },
+    { key: "er", label: "Spending, revised", num: true, fmt: short },
+    { key: "ex", label: "Spending, actual", num: true, fmt: short },
+  ], years.map((y) => ({ year: y, ra: approvedOf(S[y], "revenue"), rr: S[y].revenue_revised, rx: S[y].revenue_actual,
+    ea: approvedOf(S[y], "expenditure"), er: S[y].expenditure_revised, ex: S[y].expenditure_actual }))));
+
+  /* spending by function */
+  const GROUPS = ["04", "09", "01", "05", "06", "08", "10", "other"];
+  const groupName = (g) => (g === "other" ? "Other" : sectionName(g));
+  const groupColor = (g) => (g === "other" ? css("--s-other") : sectionColor(g));
+  const fYears = [...new Set(B.functions_by_year.map((r) => r.year))].sort();
+  const fv = {};
+  for (const r of B.functions_by_year) {
+    const g = GROUPS.includes(r.section) ? r.section : "other";
+    const v = r.source === "report" ? r.actual : r.approved;
+    fv[r.year] = fv[r.year] || {};
+    fv[r.year][g] = (fv[r.year][g] || 0) + (v || 0);
+  }
+  const fTotal = (y) => GROUPS.reduce((a, g) => a + (fv[y][g] || 0), 0);
+  const lf = document.getElementById("legend-func");
+  for (const g of GROUPS) lf.append(el("span", null, [el("i", { style: `background:${g === "other" ? "var(--s-other)" : `var(${({ "04": "--s1", "09": "--s2", "01": "--s3", "05": "--s4", "06": "--s5", "08": "--s6", "10": "--s7" })[g]})`}` }), groupName(g)]));
+
+  let mode = "amd";
+  const funcChart = chart(document.getElementById("c-func"), () => Object.assign(base(), {
+    grid: { left: 48, right: 12, top: 12, bottom: 28 },
+    tooltip: Object.assign(base().tooltip, {
+      trigger: "axis", axisPointer: { type: "shadow", shadowStyle: { color: css("--hover") } },
+      formatter: (ps) => {
+        const y = Number(ps[0].dataIndex != null ? fYears[ps[0].dataIndex] : ps[0].axisValue);
+        const tot = fTotal(y);
+        return `<div style="font-weight:600">${esc(ps[0].axisValue)} · ${esc(amd(tot))}</div>` +
+          ps.slice().reverse().filter((p) => fv[y][p.seriesId]).map((p) =>
+            tipRow(p.color, `${short(fv[y][p.seriesId])} · ${pct(fv[y][p.seriesId] / tot)}`, p.seriesName)).join("");
+      },
+    }),
+    xAxis: axis({ type: "category", data: fYears.map((y) => (y === 2026 ? "2026 plan" : String(y))), splitLine: { show: false } }),
+    yAxis: axis({ type: "value", axisLine: { show: false }, max: mode === "share" ? 1 : null,
+      axisLabel: { color: css("--muted"), formatter: (v) => (mode === "share" ? `${Math.round(v * 100)}%` : `${v / 1000}`) } }),
+    series: GROUPS.map((g) => ({
+      id: g, name: groupName(g), type: "bar", stack: "f", barWidth: "58%",
+      itemStyle: { color: groupColor(g), borderColor: css("--surface"), borderWidth: 1 },
+      emphasis: { focus: "series" },
+      data: fYears.map((y) => (mode === "share" ? (fv[y][g] || 0) / fTotal(y) : (fv[y][g] || 0))),
+    })),
+  }));
+  seg(document.getElementById("mode"), [["amd", "AMD"], ["share", "Share"]], mode, (v) => { mode = v; funcChart.render(); }, "Units");
+  const t2 = document.getElementById("t2");
+  tableToggle(document.getElementById("t2-btn"), t2, () => table(t2,
+    [{ key: "name", label: "Function" }].concat(fYears.map((y) => ({ key: String(y), label: y === 2026 ? "2026 plan" : String(y), num: true, fmt: short }))),
+    GROUPS.map((g) => Object.assign({ name: groupName(g) }, Object.fromEntries(fYears.map((y) => [String(y), fv[y][g] || 0]))))));
+
+  /* economic classification: sparkline rows */
+  const E = B.economic;
+  const eYears = years.filter((y) => y >= 2017);
+  const byYear = Object.fromEntries(E.map((r) => [r.year, r]));
+  const econ = document.getElementById("econ");
+  econ.append(el("div", { class: "econ-row head" }, [el("span", { text: "Item" }), el("span", { text: "2017 → 2026" }),
+    el("span", { class: "econ-val", text: "2026 plan" }), el("span", { class: "econ-share", text: "Share" })]));
+  const ns = "http://www.w3.org/2000/svg";
+  const last = byYear[2026];
+  const gross = B.econ_groups.filter((g) => g.key !== "asset_sales").reduce((a, g) => a + last[g.key], 0);
+  for (const g of B.econ_groups) {
+    const vals = eYears.map((y) => (byYear[y] ? byYear[y][g.key] : null));
+    const max = Math.max(...vals.filter((v) => v != null).map(Math.abs));
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("class", "spark"); svg.setAttribute("viewBox", `0 0 ${eYears.length * 10} 34`);
+    svg.setAttribute("preserveAspectRatio", "none"); svg.setAttribute("aria-hidden", "true");
+    vals.forEach((v, i) => {
+      const r = document.createElementNS(ns, "rect");
+      const h = v == null ? 2 : Math.max(1.5, Math.abs(v) / max * 32);
+      r.setAttribute("x", i * 10 + 1.5); r.setAttribute("width", 7); r.setAttribute("y", 34 - h); r.setAttribute("height", h);
+      r.setAttribute("rx", 1.5);
+      r.setAttribute("class", v == null ? "na" : v < 0 ? "neg" : i === vals.length - 1 ? "last" : "");
+      const t = document.createElementNS(ns, "title"); t.textContent = `${eYears[i]}: ${v == null ? "no data" : amd(v)}`;
+      r.append(t); svg.append(r);
+    });
+    econ.append(el("div", { class: "econ-row" }, [
+      el("span", { class: "econ-name", text: g.label }),
+      el("span", { class: "spark-cell" }, svg),
+      el("span", { class: "econ-val", text: short(last[g.key]) }),
+      el("span", { class: "econ-share", text: g.key === "asset_sales" ? "offset" : pct(last[g.key] / gross) }),
+    ]));
+  }
+})();
+</script>
+</body>
+</html>

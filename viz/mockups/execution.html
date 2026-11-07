@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Yerevan Budget Plan vs Actual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+  .bullets { display: grid; }
+  .brow {
+    display: grid; grid-template-columns: minmax(170px, 1.2fr) minmax(180px, 2.4fr) 86px 118px; gap: 14px;
+    align-items: center; padding: 9px 4px; border-bottom: 1px solid var(--line);
+  }
+  .brow.head { font-size: 12px; color: var(--muted); padding-top: 0; }
+  .brow.child { padding-left: 26px; background: color-mix(in srgb, var(--bg) 55%, transparent); }
+  .brow.child .bname { font-weight: 450; font-size: 13px; color: var(--ink-2); }
+  .bname { display: flex; gap: 8px; align-items: center; font-size: 13.5px; font-weight: 600; background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+  .bname .dot { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+  .bname .chev { color: var(--muted); font-size: 11px; width: 10px; flex: none; transition: transform 0.15s; }
+  .bname[aria-expanded="true"] .chev { transform: rotate(90deg); }
+  .brow.child .bname { cursor: default; }
+  .track { position: relative; height: 22px; }
+  .track .plan { position: absolute; left: 0; top: 3px; height: 16px; background: var(--q1); border-radius: 0 4px 4px 0; }
+  .track .act { position: absolute; left: 0; top: 7px; height: 8px; background: var(--s1); border-radius: 0 4px 4px 0; }
+  .track .appr { position: absolute; top: 0; width: 2px; height: 22px; background: var(--ink); border-radius: 1px; }
+  .track .pace { position: absolute; top: 0; width: 1px; height: 22px; background: var(--muted); }
+  .bval { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; font-size: 13.5px; }
+  .bval small { display: block; font-weight: 450; color: var(--muted); font-size: 11.5px; }
+  .brate { justify-self: end; }
+  .lg-tick { width: 2px !important; height: 12px !important; background: var(--ink); border-radius: 1px; }
+  .lg-pace { width: 1px !important; height: 12px !important; background: var(--muted); }
+  @media (max-width: 760px) {
+    .brow { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name rate" "track val"; gap: 6px 12px; }
+    .brow > .bname { grid-area: name; }
+    .brow > .track { grid-area: track; }
+    .brow > .bval { grid-area: val; }
+    .brow > .brate { grid-area: rate; }
+    .brow.head { display: none; }
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="page-head">
+    <h1>Plan vs actual</h1>
+    <p class="lede">How much of the plan the city actually collected and spent. Execution reports are cumulative from 1 January and compare the result with the revised annual plan.</p>
+    <div class="pattern">
+      <span><b>Pattern:</b> budget execution tracker, as in Civio Presupuesto (“budgeted vs executed”) and Gobierto (execution module)</span>
+      <span class="chip">HTML/CSS bullet bars</span><span class="chip">ECharts line</span>
+    </div>
+  </div>
+
+  <div class="filters">
+    <div class="filter"><span>Year</span><span id="f-year"></span></div>
+    <div class="filter"><span>Report</span><span id="f-period"></span></div>
+  </div>
+
+  <section class="tiles" id="tiles" aria-label="Execution summary"></section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2 id="b-title">Spending by function</h2>
+        <p>Click a function to see its sub-functions.</p>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--s1)"></i>Actual</span>
+      <span><i style="background:var(--q1)"></i>Revised plan</span>
+      <span><i class="lg-tick"></i>Approved budget</span>
+      <span id="lg-pace"><i class="lg-pace"></i>Even pace for the period</span>
+    </div>
+    <div class="bullets" id="bullets"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div>
+        <h2>Pace through the year</h2>
+        <p>Cumulative execution as a share of the revised annual plan. Selected year in colour, other years in grey.</p>
+      </div>
+      <div id="f-stmt"></div>
+    </div>
+    <div class="chart" id="c-pace" role="img" aria-label="Line chart of cumulative execution by quarter for each year"></div>
+    <p class="note"><b>Reading the lines:</b> spending typically lags in the first half and catches up in the fourth quarter, when capital works are paid. A line above the grey diagonal is ahead of an even pace.</p>
+  </section>
+</main>
+
+<script src="data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<script src="assets/common.js"></script>
+<script>
+(function () {
+  const { B, css, el, amd, short, pct, esc, base, axis, chart, tipRow, seg, sectionColor, sectionName } = YB;
+  YB.header("execution.html");
+
+  const PERIODS = ["Q1", "H1", "9M", "FY"];
+  const PLABEL = { Q1: "January–March", H1: "January–June", "9M": "January–September", FY: "Full year" };
+  const PACE = { Q1: 0.25, H1: 0.5, "9M": 0.75, FY: 1 };
+  const years = [...new Set(B.periods.map((p) => p.year))].filter((y) => y >= 2021).sort();
+  const avail = (y) => PERIODS.filter((p) => B.periods.some((r) => r.year === y && r.period === p && r.statement === "expenditure"));
+  let year = years[years.length - 1];
+  let period = avail(year).slice(-1)[0];
+  let stmt = "expenditure";
+
+  function status(rate, expected) {
+    if (rate == null || !isFinite(rate)) return { cls: "", label: "n/a" };
+    const r = rate / expected;
+    if (r >= 1.02 && expected === 1) return { cls: "good", label: "Above plan" };
+    if (r >= 0.95) return { cls: "good", label: "On plan" };
+    if (r >= 0.85) return { cls: "warning", label: "Behind" };
+    if (r >= 0.7) return { cls: "serious", label: "Lagging" };
+    return { cls: "critical", label: "Far behind" };
+  }
+  const pill = (rate, expected) => {
+    const s = status(rate, expected);
+    return el("span", { class: `pill ${s.cls}`, title: s.label, text: `${pct(rate)} · ${s.label}` });
+  };
+
+  function renderTiles() {
+    const tiles = document.getElementById("tiles");
+    tiles.replaceChildren();
+    for (const st of ["revenue", "expenditure"]) {
+      const r = B.periods.find((p) => p.year === year && p.period === period && p.statement === st);
+      const title = `${st === "revenue" ? "Revenue collected" : "Spending executed"} · ${PLABEL[period]} ${year}`;
+      if (!r || r.actual == null) {
+        tiles.append(el("div", { class: "tile" }, [el("div", { class: "tile-label", text: title }),
+          el("div", { class: "tile-value", text: "n/a" }), el("div", { class: "tile-sub", text: "This table is missing in the source report." })]));
+        continue;
+      }
+      const rate = r.actual / r.revised;
+      tiles.append(el("div", { class: "tile" }, [
+        el("div", { class: "tile-label", text: title }),
+        el("div", { class: "tile-value" }, [pct(rate), el("small", { text: "of revised plan" })]),
+        el("div", { class: "tile-sub", text: `${amd(r.actual)} of ${amd(r.revised)} (approved: ${amd(r.approved)})` }),
+        el("div", null, pill(rate, PACE[period])),
+      ]));
+    }
+    tiles.append(el("div", { class: "tile" }, [
+      el("div", { class: "tile-label", text: "Even pace for this report" }),
+      el("div", { class: "tile-value", text: pct(PACE[period]) }),
+      el("div", { class: "tile-sub", text: "Share of the year elapsed. Status pills compare execution with this pace." }),
+    ]));
+  }
+
+  function bulletRow(name, color, r, scale, opts) {
+    const rate = r.revised ? r.actual / r.revised : null;
+    const track = el("div", { class: "track", "aria-hidden": "true" }, [
+      el("span", { class: "plan", style: `width:${Math.max(0, r.revised || 0) / scale * 100}%` }),
+      el("span", { class: "act", style: `width:${Math.max(0, r.actual || 0) / scale * 100}%;background:${color}` }),
+      r.approved ? el("span", { class: "appr", style: `left:calc(${r.approved / scale * 100}% - 1px)` }) : null,
+      PACE[period] < 1 && r.revised ? el("span", { class: "pace", style: `left:${r.revised * PACE[period] / scale * 100}%` }) : null,
+    ]);
+    track.addEventListener("pointermove", (e) => YB.tip(e, [
+      el("b", { text: name }),
+      el("div", { text: `Actual: ${amd(r.actual)}` }),
+      el("div", { text: `Revised plan: ${amd(r.revised)}` }),
+      el("div", { text: `Approved budget: ${amd(r.approved)}` }),
+      el("div", { text: `Executed: ${pct(rate)}` }),
+    ]));
+    track.addEventListener("pointerleave", () => YB.tip(null, null));
+    const nameNode = opts.button
+      ? el("button", { class: "bname", type: "button", "aria-expanded": "false" }, [el("span", { class: "chev", text: "▶" }),
+        el("span", { class: "dot", style: `background:${color}` }), el("span", { text: name })])
+      : el("span", { class: "bname" }, el("span", { text: name }));
+    const row = el("div", { class: `brow${opts.child ? " child" : ""}` }, [
+      nameNode, track,
+      el("div", { class: "bval" }, [short(r.actual), el("small", { text: `of ${short(r.revised)}` })]),
+      el("div", { class: "brate" }, rate == null ? el("span", { class: "pill", text: "no plan" }) : pill(rate, PACE[period])),
+    ]);
+    return { row, nameNode };
+  }
+
+  function renderBullets() {
+    document.getElementById("b-title").textContent = `Spending by function · ${PLABEL[period]} ${year}`;
+    document.getElementById("lg-pace").hidden = PACE[period] === 1;
+    const rows = B.functions_by_period.filter((r) => r.year === year && r.period === period && ((r.revised || 0) > 0 || (r.approved || 0) > 0));
+    rows.sort((a, b) => (b.revised || 0) - (a.revised || 0));
+    const classes = B.classes_by_period.filter((r) => r.year === year && r.period === period);
+    const scale = Math.max(...rows.map((r) => Math.max(r.revised || 0, r.approved || 0, r.actual || 0)));
+    const box = document.getElementById("bullets");
+    box.replaceChildren(el("div", { class: "brow head" }, [el("span", { text: "Function" }), el("span", { text: "Actual against plan" }),
+      el("span", { class: "bval", text: "Actual" }), el("span", { class: "brate", text: "Executed" })]));
+    for (const r of rows) {
+      const color = sectionColor(r.section);
+      const { row, nameNode } = bulletRow(sectionName(r.section), color, r, scale, { button: true });
+      box.append(row);
+      const kids = classes.filter((c) => c.code.startsWith(r.section + ".") && ((c.revised || 0) > 0 || (c.actual || 0) > 0))
+        .sort((a, b) => (b.revised || 0) - (a.revised || 0));
+      const kidRows = kids.map((c) => {
+        const k = bulletRow(B.class_names[c.code] || c.code, color, c, scale, { child: true }).row;
+        k.hidden = true;
+        return k;
+      });
+      kidRows.forEach((k) => box.append(k));
+      if (!kidRows.length) nameNode.querySelector(".chev").style.visibility = "hidden";
+      nameNode.addEventListener("click", () => {
+        const open = nameNode.getAttribute("aria-expanded") !== "true";
+        nameNode.setAttribute("aria-expanded", String(open));
+        kidRows.forEach((k) => { k.hidden = !open; });
+      });
+    }
+  }
+
+  const pace = chart(document.getElementById("c-pace"), () => {
+    const o = base();
+    const xs = PERIODS;
+    const series = years.map((y) => {
+      const sel = y === year;
+      const data = xs.map((p) => {
+        const r = B.periods.find((q) => q.year === y && q.period === p && q.statement === stmt);
+        return r && r.actual != null && r.revised ? +(r.actual / r.revised).toFixed(4) : null;
+      });
+      let last = -1; data.forEach((v, i) => { if (v != null) last = i; });
+      const col = sel ? css("--s1") : css("--s-other");
+      return {
+        name: String(y), type: "line", data: data.map((v, i) => (i === last
+          ? { value: v, label: { show: true, position: "right", formatter: String(y), color: sel ? css("--ink") : css("--muted"), fontWeight: sel ? 700 : 500 } }
+          : v)),
+        connectNulls: true, symbol: "circle", symbolSize: sel ? 8 : 5, z: sel ? 5 : 2,
+        lineStyle: { width: sel ? 3 : 1.5, color: col }, itemStyle: { color: col, borderColor: css("--surface"), borderWidth: sel ? 2 : 0 },
+        emphasis: { focus: "series" },
+      };
+    });
+    series.push({ name: "Even pace", type: "line", data: [0.25, 0.5, 0.75, 1], symbol: "none", silent: true,
+      lineStyle: { width: 1, color: css("--axis") }, z: 1, tooltip: { show: false } });
+    return Object.assign(o, {
+      grid: { left: 44, right: 56, top: 14, bottom: 30 },
+      tooltip: Object.assign(o.tooltip, {
+        trigger: "axis", axisPointer: { type: "line", lineStyle: { color: css("--axis") } },
+        formatter: (ps) => `<div style="font-weight:600">${esc(PLABEL[ps[0].axisValue])}</div>` +
+          ps.filter((p) => p.seriesName !== "Even pace" && p.value != null).sort((a, b) => b.value - a.value)
+            .map((p) => tipRow(p.color, pct(p.value), p.seriesName)).join(""),
+      }),
+      xAxis: axis({ type: "category", data: xs, boundaryGap: false, splitLine: { show: false },
+        axisLabel: { color: css("--muted"), formatter: (v) => ({ Q1: "Q1", H1: "H1", "9M": "9 months", FY: "Full year" })[v] } }),
+      yAxis: axis({ type: "value", min: 0, max: 1.1, interval: 0.25, axisLine: { show: false },
+        axisLabel: { color: css("--muted"), formatter: (v) => `${Math.round(v * 100)}%` } }),
+      series,
+    });
+  });
+  seg(document.getElementById("f-stmt"), [["expenditure", "Spending"], ["revenue", "Revenue"]], stmt, (v) => { stmt = v; pace.render(); }, "Statement");
+
+  const periodBox = document.getElementById("f-period");
+  function renderPeriods() {
+    periodBox.replaceChildren();
+    const av = avail(year);
+    if (!av.includes(period)) period = av[av.length - 1];
+    seg(periodBox, av.map((p) => [p, p === "FY" ? "Full year" : p]), period, (v) => { period = v; renderAll(false); }, "Report");
+  }
+  function renderAll(withPeriods) {
+    if (withPeriods) renderPeriods();
+    renderTiles();
+    renderBullets();
+    pace.render();
+  }
+  seg(document.getElementById("f-year"), years.map((y) => [y, String(y)]), year, (v) => { year = v; renderAll(true); }, "Year");
+  renderAll(true);
+})();
+</script>
+</body>
+</html>
