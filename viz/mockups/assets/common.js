@@ -1,17 +1,128 @@
-/* Shared helpers for the Yerevan budget mockups. Data: window.BUDGET (data.js), amounts in million AMD. */
+/* Shared helpers for the Yerevan budget mockups. Data: window.BUDGET (data.js), amounts in million AMD.
+
+   Languages: every language of the database (data.js "languages"). The interface strings are in
+   assets/i18n/<lang>/common.js (shared) and assets/i18n/<lang>/<page>.js; English is the fallback.
+   A page runs its code in YB.ready("<page>", fn): the strings of the chosen language are loaded first, the
+   names of data.js are localised in place (B.class_names, B.district_names, B.hierarchy, ... become plain
+   strings of that language) and the elements marked data-i18n / data-i18n-html / data-i18n-attr are
+   translated. Arabic and Persian switch the page to right-to-left; charts stay left-to-right. */
 (function () {
   "use strict";
   const B = window.BUDGET;
 
-  const PAGES = [
-    ["index.html", "Tools & mockups"],
-    ["overview.html", "At a glance"],
-    ["treemap.html", "Where money goes"],
-    ["flow.html", "Money flow"],
-    ["execution.html", "Plan vs actual"],
-    ["districts.html", "Districts"],
-    ["receipt.html", "Tax receipt"],
-  ];
+  /* languages, in the order of the switcher; names in the language itself */
+  const LANGS = [
+    ["hy", "Հայերեն"], ["en", "English"], ["ru", "Русский"], ["fr", "Français"], ["es", "Español"],
+    ["pt", "Português"], ["de", "Deutsch"], ["ar", "العربية"], ["fa", "فارسی"],
+  ].filter(([c]) => !B.languages || B.languages.includes(c));
+  const CODES = LANGS.map((l) => l[0]);
+  const RTL = new Set(["ar", "fa"]);
+  // number formatting: the conventions of the language, but always the digits 0–9 (as in the data)
+  // (browsers without Armenian locale data fall back to ru-RU: the same separators, 1 086 677,5)
+  const LOCALE = { hy: ["hy-AM", "ru-RU"], en: "en-GB", ru: "ru-RU", fr: "fr-FR", es: "es-ES", pt: "pt-BR", de: "de-DE",
+    ar: "ar-u-nu-latn", fa: "fa-u-nu-latn" };
+  const STORE = "yb-lang";
+
+  function pickLang() {
+    const q = new URLSearchParams(location.search).get("lang");
+    if (CODES.includes(q)) return q;
+    try { const s = localStorage.getItem(STORE); if (CODES.includes(s)) return s; } catch (e) { /* storage off */ }
+    for (const l of navigator.languages || [navigator.language || ""]) {
+      const c = String(l).slice(0, 2).toLowerCase();
+      if (CODES.includes(c)) return c;
+    }
+    return "en";
+  }
+  const lang = pickLang();
+  const rtl = RTL.has(lang);
+
+  /* interface strings */
+  const STR = {};
+  function strings(l, obj) { STR[l] = Object.assign(STR[l] || {}, obj); }
+  function has(key) { return (STR[lang] && STR[lang][key] != null) || (STR.en && STR.en[key] != null); }
+  function t(key, vars) {
+    let s = STR[lang] && STR[lang][key];
+    if (s == null) s = STR.en && STR.en[key];
+    if (s == null) { console.warn("i18n: no string", key); s = key; }
+    if (vars) s = s.replace(/\{(\w+)\}/g, (m, k) => (vars[k] != null ? vars[k] : m));
+    return s;
+  }
+  /* a multilingual name of data.js ({"hy": ..., "en": ...} or an index into B.names) in the language */
+  function name(x) {
+    if (typeof x === "number" && B.names) x = B.names[x];
+    if (x == null || typeof x !== "object") return x;
+    return x[lang] || x.en || x.hy || "";
+  }
+  function localizeData() {
+    if (B._lang === lang) return;
+    B._lang = lang;
+    if (B.sections) for (const c of Object.keys(B.sections)) B.sections[c] = t(`section.${c}`);
+    if (B.class_names) for (const c of Object.keys(B.class_names)) B.class_names[c] = name(B.class_names[c]);
+    for (const d of B.district_names || []) d.name = name(d.name);
+    for (const g of B.econ_groups || []) g.label = t(`econ.${g.key}`);
+    for (const r of B.revenue || []) for (const g of r.groups) g.label = t(`rev.${g.key}`);
+    for (const tree of Object.values(B.hierarchy || {})) {
+      for (const s of tree) {
+        s.name = t(`section.${s.code}`);
+        for (const c of s.children) {
+          c.name = name(c.name);
+          for (const p of c.children) p.name = p.key ? t(`data.${p.key}`) : name(p.name);
+        }
+      }
+    }
+  }
+
+  /* links between the pages keep the language */
+  function withLang(href) {
+    if (!href || /^([a-z]+:|#|\/\/)/i.test(href) || !/\.html(\?|#|$)/.test(href)) return href;
+    const [path, hash] = href.split("#");
+    const [file, query] = path.split("?");
+    const p = new URLSearchParams(query || "");
+    p.set("lang", lang);
+    return `${file}?${p}${hash != null ? `#${hash}` : ""}`;
+  }
+  function setLang(l) {
+    try { localStorage.setItem(STORE, l); } catch (e) { /* storage off */ }
+    const u = new URL(location.href);
+    u.searchParams.set("lang", l);
+    location.assign(u.toString());
+  }
+
+  function translateDom(root) {
+    const r = root || document;
+    for (const n of r.querySelectorAll("[data-i18n]")) n.textContent = t(n.dataset.i18n);
+    for (const n of r.querySelectorAll("[data-i18n-html]")) n.innerHTML = t(n.dataset.i18nHtml);
+    for (const n of r.querySelectorAll("[data-i18n-attr]")) {
+      for (const pair of n.dataset.i18nAttr.split(";")) {
+        const [attr, key] = pair.split(":").map((s) => s.trim());
+        if (attr && key) n.setAttribute(attr, t(key));
+      }
+    }
+    for (const a of r.querySelectorAll("a[href]")) a.setAttribute("href", withLang(a.getAttribute("href")));
+  }
+
+  function load(src) {
+    return new Promise((resolve) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = () => { console.warn("i18n: cannot load", src); resolve(); };
+      document.head.append(s);
+    });
+  }
+  /* run the code of a page once the strings of the language are loaded */
+  function ready(page, fn) {
+    document.documentElement.lang = lang;
+    document.documentElement.dir = rtl ? "rtl" : "ltr";
+    const files = [...new Set(["en", lang])].flatMap((l) => [`assets/i18n/${l}/common.js`, `assets/i18n/${l}/${page}.js`]);
+    Promise.all(files.map(load)).then(() => {
+      localizeData();
+      translateDom();
+      fn();
+    });
+  }
+
+  const PAGES = ["index", "overview", "treemap", "flow", "execution", "districts", "receipt"];
 
   // Colour follows the functional section everywhere (fixed mapping, never by rank).
   const SECTION_SLOT = {
@@ -20,7 +131,7 @@
   };
   const SECTION_ORDER = ["04", "09", "01", "05", "06", "08", "10", "07", "02", "03", "11"];
 
-  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
   const sectionColor = (code) => css(SECTION_SLOT[code] || "--s-other");
   const sectionName = (code) => (B.sections && B.sections[code]) || code;
   const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -28,24 +139,30 @@
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => (
     { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-  /* numbers: input in million AMD */
-  function bn(m, d = 1) { return (m / 1000).toFixed(d); }
+  /* numbers in the conventions of the language; input amounts in million AMD */
+  const NF = {};
+  function num(x, d = 0) {
+    if (x == null || isNaN(x)) return t("fmt.na");
+    const f = NF[d] || (NF[d] = new Intl.NumberFormat(LOCALE[lang] || lang, { minimumFractionDigits: d, maximumFractionDigits: d }));
+    return f.format(x);
+  }
+  function bn(m, d = 1) { return num(m / 1000, d); }
   function amd(m) {
-    if (m == null || isNaN(m)) return "n/a";
+    if (m == null || isNaN(m)) return t("fmt.na");
     const a = Math.abs(m);
-    if (a >= 1000) return `AMD ${(m / 1000).toFixed(1)} bn`;
-    if (a >= 1) return `AMD ${m.toFixed(a >= 100 ? 0 : 1)} m`;
-    return `AMD ${Math.round(m * 1000)} k`;
+    if (a >= 1000) return t("fmt.amd_bn", { n: num(m / 1000, 1) });
+    if (a >= 1) return t("fmt.amd_m", { n: num(m, a >= 100 ? 0 : 1) });
+    return t("fmt.amd_k", { n: num(Math.round(m * 1000)) });
   }
   function short(m) {
-    if (m == null || isNaN(m)) return "n/a";
+    if (m == null || isNaN(m)) return t("fmt.na");
     const a = Math.abs(m);
-    if (a >= 1000) return `${(m / 1000).toFixed(1)} bn`;
-    if (a >= 1) return `${m.toFixed(a >= 100 ? 0 : 1)} m`;
-    return `${Math.round(m * 1000)} k`;
+    if (a >= 1000) return t("fmt.bn", { n: num(m / 1000, 1) });
+    if (a >= 1) return t("fmt.m", { n: num(m, a >= 100 ? 0 : 1) });
+    return t("fmt.k", { n: num(Math.round(m * 1000)) });
   }
-  const dram = (v) => Math.round(v).toLocaleString("en-US");
-  const pct = (x, d = 0) => (x == null || isNaN(x) ? "n/a" : `${(x * 100).toFixed(d)}%`);
+  const dram = (v) => num(Math.round(v));
+  const pct = (x, d = 0) => (x == null || isNaN(x) ? t("fmt.na") : t("fmt.pct", { n: num(x * 100, d) }));
 
   function onTheme(cb) {
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -67,22 +184,33 @@
     return n;
   }
 
+  function langSwitch() {
+    const sel = el("select", { class: "lang", "aria-label": t("ui.language"), title: t("ui.language") });
+    for (const [c, label] of LANGS) sel.append(el("option", { value: c, lang: c, dir: RTL.has(c) ? "rtl" : "ltr", text: label }));
+    sel.value = lang;
+    sel.addEventListener("change", () => setLang(sel.value));
+    return sel;
+  }
+
   function header(active) {
-    const nav = el("nav", { class: "nav", "aria-label": "Mockups" });
-    for (const [href, label] of PAGES) {
-      nav.append(el("a", { href, "aria-current": href === active ? "page" : null, text: label }));
+    const nav = el("nav", { class: "nav", "aria-label": t("ui.pages") });
+    for (const p of PAGES) {
+      const href = `${p}.html`;
+      nav.append(el("a", { href: withLang(href), "aria-current": href === active ? "page" : null, text: t(`nav.${p}`) }));
     }
     const bar = el("header", { class: "topbar" }, el("div", { class: "topbar-inner" }, [
-      el("a", { class: "brand", href: "index.html" }, [
+      el("a", { class: "brand", href: withLang("index.html") }, [
         el("span", { class: "brand-mark", "aria-hidden": "true", text: "֏" }),
-        el("span", null, ["Yerevan Budget", el("small", { text: "visualization mockups" })]),
+        el("span", null, [t("brand.title"), el("small", { text: t("brand.subtitle") })]),
       ]),
       nav,
+      langSwitch(),
     ]));
     document.body.prepend(bar);
     const foot = el("footer", { class: "foot" }, [
-      el("p", { text: "Data: Yerevan Municipality, Finance section (budget decisions and form Հ-9 execution reports), collected into DuckDB by opendataam/arm-yerevan-budget. Amounts are nominal AMD." }),
-      el("p", { text: `Mockup, not an official publication. Data snapshot ${B.generated}.` }),
+      el("p", { text: t("foot.data") }),
+      el("p", { text: t("foot.mockup", { date: B.generated }) }),
+      lang !== "en" ? el("p", { text: t("foot.translation") }) : null,
     ]);
     document.body.append(foot);
   }
@@ -96,7 +224,7 @@
       tooltip: {
         backgroundColor: css("--surface"), borderColor: css("--line"), borderWidth: 1,
         textStyle: { color: css("--ink"), fontSize: 12.5 },
-        extraCssText: "box-shadow:0 6px 22px rgba(0,0,0,.14);border-radius:8px;",
+        extraCssText: `box-shadow:0 6px 22px rgba(0,0,0,.14);border-radius:8px;direction:${rtl ? "rtl" : "ltr"};text-align:start;`,
         confine: true,
       },
     };
@@ -145,10 +273,10 @@
   /* table view: columns [{key,label,num,fmt}] */
   function table(container, columns, rows) {
     container.replaceChildren();
-    const t = el("table", { class: "data" });
+    const tbl = el("table", { class: "data" });
     const thead = el("tr");
     for (const c of columns) thead.append(el("th", { class: c.num ? "num" : null, text: c.label }));
-    t.append(el("thead", null, thead));
+    tbl.append(el("thead", null, thead));
     const tb = el("tbody");
     for (const r of rows) {
       const tr = el("tr");
@@ -158,15 +286,16 @@
       }
       tb.append(tr);
     }
-    t.append(tb);
-    container.append(t);
+    tbl.append(tb);
+    container.append(tbl);
   }
   function tableToggle(btn, wrap, fill) {
+    btn.textContent = t("ui.show_table");
     btn.addEventListener("click", () => {
       const show = wrap.hidden;
       if (show && fill) fill();
       wrap.hidden = !show;
-      btn.textContent = show ? "Hide table" : "Show table";
+      btn.textContent = show ? t("ui.hide_table") : t("ui.show_table");
       btn.setAttribute("aria-expanded", String(show));
     });
   }
@@ -188,15 +317,16 @@
 
   /* status of an execution rate */
   function execStatus(rate) {
-    if (rate == null || isNaN(rate)) return { cls: "", label: "n/a" };
-    if (rate >= 0.95) return { cls: "good", label: "On plan" };
-    if (rate >= 0.85) return { cls: "warning", label: "Behind" };
-    if (rate >= 0.7) return { cls: "serious", label: "Lagging" };
-    return { cls: "critical", label: "Far behind" };
+    if (rate == null || isNaN(rate)) return { cls: "", label: t("fmt.na") };
+    if (rate >= 0.95) return { cls: "good", label: t("status.good") };
+    if (rate >= 0.85) return { cls: "warning", label: t("status.warning") };
+    if (rate >= 0.7) return { cls: "serious", label: t("status.serious") };
+    return { cls: "critical", label: t("status.critical") };
   }
 
   window.YB = {
-    B, PAGES, SECTION_ORDER, css, sectionColor, sectionName, esc, bn, amd, short, dram, pct, onTheme, el,
-    header, base, axis, chart, tipRow, seg, table, tableToggle, tip, execStatus, reduced,
+    B, LANGS, lang, rtl, PAGES, SECTION_ORDER, css, sectionColor, sectionName, esc, num, bn, amd, short, dram, pct,
+    onTheme, el, header, base, axis, chart, tipRow, seg, table, tableToggle, tip, execStatus, reduced,
+    t, has, name, strings, ready, translateDom, withLang,
   };
 })();

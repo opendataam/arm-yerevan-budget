@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Your Yerevan Tax Receipt</title>
+<title data-i18n="receipt.title">Your Yerevan Tax Receipt</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Armenian:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <style>
   :root { --paper: #ffffff; --paper-ink: #1b1f24; --paper-rule: #c9ccd1; }
@@ -29,7 +29,7 @@
   .receipt-wrap { display: grid; justify-items: center; padding: 8px 0 24px; }
   .receipt {
     width: min(100%, 520px); background: var(--paper); color: var(--paper-ink);
-    font-family: var(--font-mono); font-size: 13px; line-height: 1.55;
+    font-family: var(--font-mono), "Noto Sans Armenian", "Noto Sans Arabic", "Noto Sans"; font-size: 13px; line-height: 1.55;
     padding: 28px 26px 40px; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 10px 30px rgba(0,0,0,.10);
     --zz: 9px;
     -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) 50% / calc(2 * var(--zz)) 100%;
@@ -45,8 +45,8 @@
   .line .dots { flex: 1; border-bottom: 1.5px dotted var(--paper-rule); transform: translateY(-4px); min-width: 12px; }
   .line .amt { flex: none; font-variant-numeric: tabular-nums; font-weight: 600; }
   .line.sec { margin-top: 8px; font-weight: 600; }
-  .line.sec .sw { width: 9px; height: 9px; display: inline-block; margin-right: 6px; border-radius: 2px; transform: translateY(-1px); }
-  .line.sub { padding-left: 18px; font-size: 12.5px; opacity: 0.85; }
+  .line.sec .sw { width: 9px; height: 9px; display: inline-block; margin-inline-end: 6px; border-radius: 2px; transform: translateY(-1px); }
+  .line.sub { padding-inline-start: 18px; font-size: 12.5px; opacity: 0.85; }
   .line.sub .amt { font-weight: 500; }
   .line.total { font-size: 16px; font-weight: 700; }
   .r-foot { text-align: center; font-size: 12px; opacity: 0.75; margin-top: 12px; display: grid; gap: 4px; }
@@ -54,40 +54,40 @@
 
   .day { display: grid; gap: 8px; }
   .drow { display: grid; grid-template-columns: 1fr 64px; gap: 10px; font-size: 13px; align-items: center; }
-  .drow .bar { height: 8px; background: var(--line); border-radius: 4px; grid-column: 1 / -1; }
+  .drow .bar { height: 8px; background: var(--line); border-radius: 4px; grid-column: 1 / -1; direction: ltr; }
   .drow .bar span { display: block; height: 100%; border-radius: 4px; }
-  .drow b { text-align: right; font-variant-numeric: tabular-nums; }
+  .drow b { text-align: end; font-variant-numeric: tabular-nums; }
 </style>
 </head>
 <body>
 <main class="page">
   <div class="page-head">
-    <h1>Your tax receipt</h1>
-    <p class="lede">Enter what you pay in local taxes and fees, and see how that money splits across city services in the 2026 budget.</p>
+    <h1 data-i18n="receipt.h1">Your tax receipt</h1>
+    <p class="lede" data-i18n="receipt.lede">Enter what you pay in local taxes and fees, and see how that money splits across city services in the 2026 budget.</p>
     <div class="pattern">
-      <span><b>Pattern:</b> personal tax receipt, as in Where Does My Money Go (“Daily Bread”), Civio Presupuesto and Gobierto (“tu recibo”)</span>
-      <span class="chip">Plain HTML/CSS, no chart library</span>
+      <span data-i18n-html="receipt.pattern"><b>Pattern:</b> personal tax receipt, as in Where Does My Money Go (“Daily Bread”), Civio Presupuesto and Gobierto (“tu recibo”)</span>
+      <span class="chip" data-i18n="receipt.chip">Plain HTML/CSS, no chart library</span>
     </div>
   </div>
 
   <div class="layout">
     <div class="grid">
       <section class="card">
-        <h2>What you pay a year</h2>
+        <h2 data-i18n="receipt.form_h2">What you pay a year</h2>
         <form class="form" id="form" novalidate>
-          <div class="presets" role="group" aria-label="Examples">
-            <button type="button" data-p="18000,0,4800">Apartment, no car</button>
-            <button type="button" data-p="18000,32000,4800">Apartment and a car</button>
-            <button type="button" data-p="65000,70000,7200">House and two cars</button>
+          <div class="presets" role="group" aria-label="Examples" data-i18n-attr="aria-label:receipt.presets_aria">
+            <button type="button" data-p="18000,0,4800" data-i18n="receipt.preset_flat">Apartment, no car</button>
+            <button type="button" data-p="18000,32000,4800" data-i18n="receipt.preset_flat_car">Apartment and a car</button>
+            <button type="button" data-p="65000,70000,7200" data-i18n="receipt.preset_house">House and two cars</button>
           </div>
-          <div class="field"><label for="i-prop">Real estate tax, AMD</label><input type="number" id="i-prop" min="0" step="1000" value="18000" inputmode="numeric"></div>
-          <div class="field"><label for="i-car">Vehicle property tax, AMD</label><input type="number" id="i-car" min="0" step="1000" value="32000" inputmode="numeric"></div>
-          <div class="field"><label for="i-fee">Waste collection and other local fees, AMD</label><input type="number" id="i-fee" min="0" step="500" value="4800" inputmode="numeric"></div>
+          <div class="field"><label for="i-prop" data-i18n="receipt.label_prop">Real estate tax, AMD</label><input type="number" id="i-prop" min="0" step="1000" value="18000" inputmode="numeric"></div>
+          <div class="field"><label for="i-car" data-i18n="receipt.label_car">Vehicle property tax, AMD</label><input type="number" id="i-car" min="0" step="1000" value="32000" inputmode="numeric"></div>
+          <div class="field"><label for="i-fee" data-i18n="receipt.label_fee">Waste collection and other local fees, AMD</label><input type="number" id="i-fee" min="0" step="500" value="4800" inputmode="numeric"></div>
         </form>
-        <p class="note">Example amounts are illustrative, not tax calculations. Local taxes are not earmarked: the receipt applies the shares of the whole 2026 budget to your payment.</p>
+        <p class="note" data-i18n="receipt.form_note">Example amounts are illustrative, not tax calculations. Local taxes are not earmarked: the receipt applies the shares of the whole 2026 budget to your payment.</p>
       </section>
       <section class="card">
-        <div><h2>A day in the budget</h2><p class="note" id="day-sub"></p></div>
+        <div><h2 data-i18n="receipt.day_h2">A day in the budget</h2><p class="note" id="day-sub"></p></div>
         <div class="day" id="day"></div>
       </section>
     </div>
@@ -101,8 +101,8 @@
 <script src="data.js"></script>
 <script src="assets/common.js"></script>
 <script>
-(function () {
-  const { B, el, dram, pct, sectionColor, sectionName } = YB;
+YB.ready("receipt", function () {
+  const { B, el, t, num, dram, esc, sectionColor, sectionName } = YB;
   YB.header("receipt.html");
 
   /* shares of gross 2026 allocations by function and sub-function (negative offsets excluded) */
@@ -118,9 +118,11 @@
   const pop = Object.values(B.population_2022).reduce((a, b) => a + b, 0);
   const perSecond = net * 1e6 / (365 * 24 * 3600);
 
-  const SHORT = { "01.1.1": "Executive bodies and administration", "04.5.5": "Metro, lifts and other transport",
-    "04.9.1": "Economic affairs n.e.c.", "05.6.1": "Environmental protection n.e.c.", "06.6.1": "Housing and amenities n.e.c.",
-    "04.1.1": "General economic affairs", "09.6.1": "Support services to education" };
+  // short names of some sub-functions: keys receipt.short_<code with _>, else the name of the classification
+  const shortName = (c) => {
+    const key = `receipt.short_${c.code.replace(/\./g, "_")}`;
+    return YB.has(key) ? t(key) : c.name;
+  };
 
   const ids = ["i-prop", "i-car", "i-fee"];
   const read = () => ids.map((id) => Math.max(0, Number(document.getElementById(id).value) || 0));
@@ -139,13 +141,13 @@
     const r = document.getElementById("receipt");
     const kids = [
       el("div", { class: "r-head" }, [
-        el("div", { class: "crest", text: "֏ YEREVAN" }),
-        el("div", { class: "t", text: "WHERE YOUR LOCAL TAXES GO" }),
-        el("div", { class: "s", text: "City budget 2026 · approved by the Council of Elders" }),
+        el("div", { class: "crest", text: `֏ ${t("receipt.r_city")}` }),
+        el("div", { class: "t", text: t("receipt.r_title") }),
+        el("div", { class: "s", text: t("receipt.r_sub") }),
       ]),
-      line("", "Real estate tax", dram(prop)),
-      line("", "Vehicle property tax", dram(car)),
-      line("", "Local fees", dram(fee)),
+      line("", t("rev.real_estate_tax"), dram(prop)),
+      line("", t("rev.vehicle_tax"), dram(car)),
+      line("", t("receipt.r_fees"), dram(fee)),
       el("hr", { class: "rule" }),
     ];
     for (const s of secs) {
@@ -153,16 +155,19 @@
       if (share < 0.004) continue;
       kids.push(line("sec", sectionName(s.code), dram(paid * share), sectionColor(s.code)));
       for (const c of s.classes.filter((c) => c.value / gross >= 0.02).slice(0, 4)) {
-        kids.push(line("sub", SHORT[c.code] || c.name, dram(paid * c.value / gross)));
+        kids.push(line("sub", shortName(c), dram(paid * c.value / gross)));
       }
     }
     const small = secs.filter((s) => s.value / gross < 0.004).reduce((a, s) => a + s.value, 0);
-    if (small > 0) kids.push(line("sec", "Health, defence, reserves", dram(paid * small / gross), "var(--s-other)"));
-    kids.push(el("hr", { class: "rule" }), line("total", "TOTAL, AMD", dram(paid)),
+    if (small > 0) kids.push(line("sec", t("receipt.r_small"), dram(paid * small / gross), "var(--s-other)"));
+    // HTML string: the value is a number formatted here, escaped
+    const seconds = el("div");
+    seconds.innerHTML = t("receipt.r_seconds", { seconds: esc(num(paid / perSecond, 1)) });
+    kids.push(el("hr", { class: "rule" }), line("total", t("receipt.r_total"), dram(paid)),
       el("div", { class: "r-foot" }, [
-        el("div", null, ["Your payment equals ", el("b", { text: `${(paid / perSecond).toFixed(1)} seconds` }), " of city spending."]),
-        el("div", { text: `The city spends about AMD ${dram(perSecond)} every second.` }),
-        el("div", { text: "Shares of gross 2026 allocations · figures rounded" }),
+        seconds,
+        el("div", { text: t("receipt.r_per_second", { amount: dram(perSecond) }) }),
+        el("div", { text: t("receipt.r_note") }),
       ]));
     r.replaceChildren(...kids);
   }
@@ -170,14 +175,14 @@
   /* a day per resident (net total), split by gross shares */
   const perDay = net * 1e6 / pop / 365;
   document.getElementById("day-sub").textContent =
-    `Spending per resident: AMD ${dram(perDay * 365)} a year, about AMD ${dram(perDay)} a day (2026 budget, 2022 census population).`;
+    t("receipt.day_sub", { annual: dram(perDay * 365), day: dram(perDay) });
   const day = document.getElementById("day");
   const top = secs.slice(0, 6);
   const maxShare = top[0].value / gross;
   for (const s of top) {
     const share = s.value / gross;
     day.append(el("div", { class: "drow" }, [
-      el("span", { text: sectionName(s.code) }), el("b", { text: `${dram(perDay * share)} ֏` }),
+      el("span", { text: sectionName(s.code) }), el("b", { text: t("receipt.dram", { n: dram(perDay * share) }) }),
       el("div", { class: "bar", "aria-hidden": "true" }, el("span", { style: `width:${share / maxShare * 100}%;background:${sectionColor(s.code)}` })),
     ]));
   }
@@ -189,7 +194,7 @@
   }));
   document.getElementById("form").addEventListener("submit", (e) => e.preventDefault());
   render();
-})();
+});
 </script>
 </body>
 </html>

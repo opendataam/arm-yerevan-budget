@@ -3,43 +3,46 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Yerevan District Budgets</title>
+<title data-i18n="districts.title">Yerevan District Budgets</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Armenian:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <style>
   .split { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); }
   .split .tile-value { font-size: 24px; }
-  .tilemap { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; max-width: 520px; width: 100%; }
+  .tilemap { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; max-width: 520px; width: 100%; direction: ltr; }
   .dtile {
     aspect-ratio: 1 / 0.82; border-radius: 8px; border: 0; padding: 8px; display: flex; flex-direction: column;
-    justify-content: space-between; text-align: left; font: inherit; cursor: pointer; min-width: 0;
+    justify-content: space-between; text-align: start; font: inherit; cursor: pointer; min-width: 0;
     outline-offset: 2px; transition: transform 0.12s;
   }
+  [dir="rtl"] .dtile { direction: rtl; }
   .dtile:hover { transform: translateY(-1px); }
   .dtile[aria-pressed="true"] { outline: 3px solid var(--ink); }
   .dtile .n { font-size: 12px; font-weight: 650; line-height: 1.15; overflow-wrap: anywhere; }
   .dtile .v { font-size: 14px; font-weight: 750; font-variant-numeric: tabular-nums; }
-  .scale { display: flex; gap: 2px; align-items: center; font-size: 11.5px; color: var(--muted); flex-wrap: wrap; }
+  .scale { display: flex; gap: 2px; align-items: center; font-size: 11.5px; color: var(--muted); flex-wrap: wrap; direction: ltr; }
+  [dir="rtl"] .scale { justify-content: flex-end; max-width: 520px; }
   .scale i { width: 28px; height: 10px; display: inline-block; }
   .scale i:first-of-type { border-radius: 3px 0 0 3px; }
   .scale i:last-of-type { border-radius: 0 3px 3px 0; }
   .rank { display: grid; gap: 4px; }
-  .rrow { display: grid; grid-template-columns: 128px 1fr 74px; gap: 10px; align-items: center; font-size: 13px; background: none; border: 0; font: inherit; color: inherit; text-align: left; padding: 3px 6px; margin: 0 -6px; border-radius: 6px; cursor: pointer; }
+  .rrow { display: grid; grid-template-columns: 128px 1fr 74px; gap: 10px; align-items: center; font-size: 13px; background: none; border: 0; font: inherit; color: inherit; text-align: start; padding: 3px 6px; margin: 0 -6px; border-radius: 6px; cursor: pointer; }
   .rrow:hover { background: var(--hover); }
   .rrow[aria-pressed="true"] { background: var(--accent-soft); }
   .rrow[aria-pressed="true"] .rname { font-weight: 700; }
+  .rtrack { direction: ltr; }
   .rbar { height: 12px; background: var(--s1); border-radius: 0 4px 4px 0; }
-  .rval { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; font-size: 13px; }
+  .rval { text-align: end; font-weight: 650; font-variant-numeric: tabular-nums; font-size: 13px; }
   .mix { display: grid; gap: 8px; }
   .mrow { display: grid; grid-template-columns: minmax(150px, 1fr) 2fr 92px; gap: 10px; align-items: center; font-size: 13px; }
-  .mtrack { position: relative; height: 14px; }
+  .mtrack { position: relative; height: 14px; direction: ltr; }
   .mtrack .m { position: absolute; left: 0; top: 2px; height: 10px; border-radius: 0 4px 4px 0; }
   .mtrack .avg { position: absolute; top: 0; width: 2px; height: 14px; background: var(--ink); border-radius: 1px; }
-  .mval { text-align: right; font-variant-numeric: tabular-nums; }
+  .mval { text-align: end; font-variant-numeric: tabular-nums; }
   .mval b { font-weight: 650; }
-  .mval span { color: var(--muted); font-size: 12px; margin-left: 4px; }
+  .mval span { color: var(--muted); font-size: 12px; margin-inline-start: 4px; unicode-bidi: isolate; }
   @media (max-width: 560px) {
     .dtile .n { font-size: 10.5px; }
     .dtile .v { font-size: 12px; }
@@ -53,25 +56,25 @@
 <body>
 <main class="page">
   <div class="page-head">
-    <h1>Twelve districts</h1>
-    <p class="lede">Yerevan's administrative districts run kindergartens, local amenities and street services from their own share of the city budget. Compare their budgets in total and per resident.</p>
+    <h1 data-i18n="districts.h1">Twelve districts</h1>
+    <p class="lede" data-i18n="districts.lede">Yerevan's administrative districts run kindergartens, local amenities and street services from their own share of the city budget. Compare their budgets in total and per resident.</p>
     <div class="pattern">
-      <span><b>Pattern:</b> territorial comparison, as in Gobierto peer comparisons and the Civio / OpenSpending map views (a tile map stands in for district boundaries)</span>
-      <span class="chip">HTML tile map</span><span class="chip">ECharts heatmap</span>
+      <span data-i18n-html="districts.pattern"><b>Pattern:</b> territorial comparison, as in Gobierto peer comparisons and the Civio / OpenSpending map views (a tile map stands in for district boundaries)</span>
+      <span class="chip" data-i18n="districts.chip_tilemap">HTML tile map</span><span class="chip" data-i18n="districts.chip_heatmap">ECharts heatmap</span>
     </div>
   </div>
 
   <div class="filters">
-    <div class="filter"><span>Approved budget</span><span id="f-year"></span></div>
-    <div class="filter"><span>Measure</span><span id="f-measure"></span></div>
+    <div class="filter"><span data-i18n="districts.f_year">Approved budget</span><span id="f-year"></span></div>
+    <div class="filter"><span data-i18n="districts.measure">Measure</span><span id="f-measure"></span></div>
   </div>
 
-  <section class="split" id="split" aria-label="Municipality and districts"></section>
+  <section class="split" id="split" aria-label="Municipality and districts" data-i18n-attr="aria-label:districts.split_aria"></section>
 
   <div class="grid grid-2">
     <section class="card">
       <div class="card-head">
-        <div><h2 id="map-title">District budgets</h2><p>Schematic tile map: positions follow geography, sizes do not. Click a district.</p></div>
+        <div><h2 id="map-title">District budgets</h2><p data-i18n="districts.map_sub">Schematic tile map: positions follow geography, sizes do not. Click a district.</p></div>
       </div>
       <div class="tilemap" id="tilemap"></div>
       <div class="scale" id="scale"></div>
@@ -84,19 +87,19 @@
 
   <section class="card">
     <div class="card-head">
-      <div><h2 id="mix-title">Spending mix</h2><p>Share of the district budget by function. The black tick marks the average across all twelve districts.</p></div>
+      <div><h2 id="mix-title">Spending mix</h2><p data-i18n="districts.mix_sub">Share of the district budget by function. The black tick marks the average across all twelve districts.</p></div>
     </div>
     <div class="mix" id="mix"></div>
   </section>
 
   <section class="card">
     <div class="card-head">
-      <div><h2>All districts by function</h2><p>Share of each district's budget. Darker cells take a larger share.</p></div>
-      <button class="toggle-table" type="button" id="t-btn" aria-expanded="false">Show table</button>
+      <div><h2 data-i18n="districts.heat_h2">All districts by function</h2><p data-i18n="districts.heat_sub">Share of each district's budget. Darker cells take a larger share.</p></div>
+      <button class="toggle-table" type="button" id="t-btn" aria-expanded="false" data-i18n="ui.show_table">Show table</button>
     </div>
-    <div style="overflow-x:auto"><div class="chart tall" id="c-heat" style="min-width:720px" role="img" aria-label="Heatmap of district budgets by function"></div></div>
+    <div style="overflow-x:auto"><div class="chart tall" id="c-heat" style="min-width:720px" role="img" aria-label="Heatmap of district budgets by function" data-i18n-attr="aria-label:districts.heat_aria"></div></div>
     <div class="table-wrap" id="tbl" hidden></div>
-    <p class="note"><b>Per resident</b> uses the 2022 census population (1,086,677 in total). Nork-Marash and Nubarashen are small in population, which lifts their per-resident figures.</p>
+    <p class="note" id="note"><b>Per resident</b> uses the 2022 census population (1,086,677 in total). Nork-Marash and Nubarashen are small in population, which lifts their per-resident figures.</p>
   </section>
 </main>
 
@@ -104,8 +107,8 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <script src="assets/common.js"></script>
 <script>
-(function () {
-  const { B, css, el, amd, short, pct, dram, esc, base, axis, chart, seg, table, tableToggle, sectionColor, sectionName } = YB;
+YB.ready("districts", function () {
+  const { B, css, el, t, amd, short, pct, dram, esc, base, axis, chart, seg, table, tableToggle, sectionColor, sectionName } = YB;
   YB.header("districts.html");
 
   const POS = {
@@ -120,13 +123,13 @@
 
   const total = (y, c) => Object.values(B.districts[y][c].sections).reduce((a, b) => a + (b || 0), 0);
   const metric = (y, c) => (measure === "total" ? total(y, c) : total(y, c) * 1e6 / B.population_2022[c]);
-  const fmt = (v) => (measure === "total" ? short(v) : `${dram(v / 1000)}k`);
-  const fmtLong = (v) => (measure === "total" ? amd(v) : `AMD ${dram(v)} per resident`);
+  const fmt = (v) => (measure === "total" ? short(v) : t("fmt.k", { n: dram(v / 1000) }));
+  const fmtLong = (v) => (measure === "total" ? amd(v) : t("districts.per_resident_amd", { amount: dram(v) }));
 
   const STEPS = ["--q2", "--q3", "--q4", "--q5", "--q6"];
   function stepOf(v, lo, hi) {
-    const t = hi > lo ? (v - lo) / (hi - lo) : 0;
-    return Math.min(STEPS.length - 1, Math.floor(t * STEPS.length));
+    const f = hi > lo ? (v - lo) / (hi - lo) : 0;
+    return Math.min(STEPS.length - 1, Math.floor(f * STEPS.length));
   }
   const inkFor = (i) => (i <= 1 ? css("--ink") : "#ffffff");
 
@@ -135,13 +138,13 @@
     const dsum = CODES.reduce((a, c) => a + total(year, c), 0);
     const box = document.getElementById("split");
     box.replaceChildren(
-      el("div", { class: "tile" }, [el("div", { class: "tile-label", text: "City-wide services (Municipality)" }),
+      el("div", { class: "tile" }, [el("div", { class: "tile-label", text: t("districts.muni_label") }),
         el("div", { class: "tile-value", text: amd(muni) }),
-        el("div", { class: "tile-sub", text: `${pct(muni / (muni + dsum))} of the ${year} budget, not split by district` }),
+        el("div", { class: "tile-sub", text: t("districts.muni_sub", { share: pct(muni / (muni + dsum)), year }) }),
         el("div", { class: "meter" }, el("span", { style: `width:${muni / (muni + dsum) * 100}%;background:var(--s-other)` }))]),
-      el("div", { class: "tile" }, [el("div", { class: "tile-label", text: "Twelve district administrations" }),
+      el("div", { class: "tile" }, [el("div", { class: "tile-label", text: t("districts.dist_label") }),
         el("div", { class: "tile-value", text: amd(dsum) }),
-        el("div", { class: "tile-sub", text: `${pct(dsum / (muni + dsum))} of the budget · AMD ${dram(dsum * 1e6 / 1086677)} per resident on average` }),
+        el("div", { class: "tile-sub", text: t("districts.dist_sub", { share: pct(dsum / (muni + dsum)), amount: dram(dsum * 1e6 / 1086677) }) }),
         el("div", { class: "meter" }, el("span", { style: `width:${dsum / (muni + dsum) * 100}%` }))]),
     );
   }
@@ -165,20 +168,20 @@
     const sc = document.getElementById("scale");
     sc.replaceChildren(el("span", { text: fmt(lo), style: "margin-right:6px" }),
       ...STEPS.map((s) => el("i", { style: `background:var(${s})` })), el("span", { text: fmt(hi), style: "margin-left:6px" }));
-    document.getElementById("map-title").textContent = measure === "total" ? `District budgets ${year}` : `Per resident ${year}`;
+    document.getElementById("map-title").textContent = t(measure === "total" ? "districts.map_title_total" : "districts.map_title_per", { year });
   }
 
   function renderRank() {
     const rows = CODES.map((c) => ({ c, v: metric(year, c) })).sort((a, b) => b.v - a.v);
     const max = rows[0].v;
-    document.getElementById("rank-title").textContent = measure === "total" ? "Ranked by budget" : "Ranked by budget per resident";
-    document.getElementById("rank-sub").textContent = measure === "total" ? "AMD, approved budget" : "AMD per resident, 2022 census population";
+    document.getElementById("rank-title").textContent = t(measure === "total" ? "districts.rank_title_total" : "districts.rank_title_per");
+    document.getElementById("rank-sub").textContent = t(measure === "total" ? "districts.rank_sub_total" : "districts.rank_sub_per");
     const box = document.getElementById("rank");
     box.replaceChildren();
     for (const r of rows) {
       const b = el("button", { class: "rrow", type: "button", "aria-pressed": String(r.c === selected) }, [
         el("span", { class: "rname", text: NAME[r.c] }),
-        el("span", null, el("div", { class: "rbar", style: `width:${r.v / max * 100}%` })),
+        el("span", { class: "rtrack" }, el("div", { class: "rbar", style: `width:${r.v / max * 100}%` })),
         el("span", { class: "rval", text: fmt(r.v) }),
       ]);
       b.addEventListener("click", () => { selected = r.c; renderSelection(); });
@@ -189,21 +192,21 @@
   function sectionsUsed(y) {
     const set = new Set();
     for (const c of CODES) {
-      const t = total(y, c);
-      for (const [s, v] of Object.entries(B.districts[y][c].sections)) if (v / t >= 0.005) set.add(s);
+      const tot = total(y, c);
+      for (const [s, v] of Object.entries(B.districts[y][c].sections)) if (v / tot >= 0.005) set.add(s);
     }
     return YB.SECTION_ORDER.filter((s) => set.has(s));
   }
   function shares(y, c) {
-    const t = total(y, c);
-    return Object.fromEntries(Object.entries(B.districts[y][c].sections).map(([s, v]) => [s, (v || 0) / t]));
+    const tot = total(y, c);
+    return Object.fromEntries(Object.entries(B.districts[y][c].sections).map(([s, v]) => [s, (v || 0) / tot]));
   }
 
   function renderMix() {
     const secs = sectionsUsed(year);
     const sh = shares(year, selected);
     const avg = Object.fromEntries(secs.map((s) => [s, CODES.reduce((a, c) => a + (shares(year, c)[s] || 0), 0) / CODES.length]));
-    document.getElementById("mix-title").textContent = `Spending mix: ${NAME[selected]} (${amd(total(year, selected))})`;
+    document.getElementById("mix-title").textContent = t("districts.mix_title", { name: NAME[selected], amount: amd(total(year, selected)) });
     const box = document.getElementById("mix");
     box.replaceChildren();
     const max = Math.max(...secs.map((s) => Math.max(sh[s] || 0, avg[s])));
@@ -211,7 +214,7 @@
       const v = B.districts[year][selected].sections[s] || 0;
       box.append(el("div", { class: "mrow" }, [
         el("span", { text: sectionName(s) }),
-        el("span", { class: "mtrack", title: `Average across districts: ${pct(avg[s], 1)}` }, [
+        el("span", { class: "mtrack", title: t("districts.avg_title", { value: pct(avg[s], 1) }) }, [
           el("span", { class: "m", style: `width:${(sh[s] || 0) / max * 100}%;background:${sectionColor(s)}` }),
           el("span", { class: "avg", style: `left:calc(${avg[s] / max * 100}% - 1px)` }),
         ]),
@@ -222,7 +225,7 @@
 
   const heat = chart(document.getElementById("c-heat"), () => {
     const secs = sectionsUsed(year);
-    const order = CODES.slice().sort((a, b) => NAME[b].localeCompare(NAME[a]));
+    const order = CODES.slice().sort((a, b) => NAME[b].localeCompare(NAME[a], YB.lang));
     const data = [];
     let max = 0;
     for (const [yi, c] of order.entries()) {
@@ -236,17 +239,19 @@
       tooltip: Object.assign(o.tooltip, {
         formatter: (p) => `<div style="font-weight:650">${esc(NAME[order[p.value[1]]])}</div>` +
           `<div style="color:${css("--ink-2")}">${esc(sectionName(secs[p.value[0]]))}</div>` +
-          `<b style="font-size:15px">${pct(p.value[2], 1)}</b> <span style="color:${css("--ink-2")}">of the district budget · ` +
-          `${esc(short((B.districts[year][order[p.value[1]]].sections[secs[p.value[0]]]) || 0))}</span>`,
+          `<span style="color:${css("--ink-2")}">${t("districts.heat_tip", {
+            share: `<b style="font-size:15px;color:${css("--ink")}">${esc(pct(p.value[2], 1))}</b>`,
+            amount: esc(short((B.districts[year][order[p.value[1]]].sections[secs[p.value[0]]]) || 0)),
+          })}</span>`,
       }),
       xAxis: axis({ type: "category", data: secs.map(sectionName), splitLine: { show: false }, axisLine: { show: false },
         axisLabel: { color: css("--ink-2"), fontSize: 11.5, interval: 0, width: 92, overflow: "break" } }),
       yAxis: axis({ type: "category", data: order.map((c) => NAME[c]), splitLine: { show: false }, axisLine: { show: false },
-        axisLabel: { color: css("--ink-2"), fontSize: 12.5 } }),
+        axisLabel: { color: css("--ink-2"), fontSize: 12.5, width: 120, overflow: "truncate" } }),
       visualMap: { show: false, min: 0, max, inRange: { color: ramp } },
       series: [{
         type: "heatmap", data: data.map((d) => ({ value: d, label: { color: d[2] / max > 0.45 ? "#ffffff" : css("--ink") } })),
-        label: { show: true, fontSize: 11.5, formatter: (p) => (p.value[2] >= 0.005 ? `${Math.round(p.value[2] * 100)}%` : "") },
+        label: { show: true, fontSize: 11.5, formatter: (p) => (p.value[2] >= 0.005 ? pct(p.value[2]) : "") },
         itemStyle: { borderColor: css("--surface"), borderWidth: 2, borderRadius: 3 },
         emphasis: { itemStyle: { borderColor: css("--ink"), borderWidth: 2 } },
       }],
@@ -255,8 +260,8 @@
   const tbl = document.getElementById("tbl");
   tableToggle(document.getElementById("t-btn"), tbl, () => {
     const secs = sectionsUsed(year);
-    table(tbl, [{ key: "d", label: "District" }, { key: "pop", label: "Residents (2022)", num: true, fmt: dram },
-      { key: "t", label: "Total", num: true, fmt: short }, { key: "pc", label: "Per resident, AMD", num: true, fmt: dram }]
+    table(tbl, [{ key: "d", label: t("districts.col_district") }, { key: "pop", label: t("districts.col_residents"), num: true, fmt: dram },
+      { key: "t", label: t("districts.total"), num: true, fmt: short }, { key: "pc", label: t("districts.col_per_resident"), num: true, fmt: dram }]
       .concat(secs.map((s) => ({ key: s, label: sectionName(s), num: true, fmt: short }))),
     CODES.map((c) => Object.assign({ d: NAME[c], pop: B.population_2022[c], t: total(year, c), pc: total(year, c) * 1e6 / B.population_2022[c] },
       B.districts[year][c].sections)));
@@ -264,10 +269,13 @@
 
   function renderSelection() { renderMap(); renderRank(); renderMix(); }
   function renderAll() { renderSplit(); renderSelection(); heat.render(); if (!tbl.hidden) document.getElementById("t-btn").click(), document.getElementById("t-btn").click(); }
-  seg(document.getElementById("f-year"), [["2024", "2024"], ["2025", "2025"], ["2026", "2026"]], year, (v) => { year = v; renderAll(); }, "Year");
-  seg(document.getElementById("f-measure"), [["total", "Total"], ["per", "Per resident"]], measure, (v) => { measure = v; renderSelection(); }, "Measure");
+  document.getElementById("note").innerHTML = t("districts.note",
+    { population: dram(1086677), district1: esc(NAME.nork_marash), district2: esc(NAME.nubarashen) });
+  seg(document.getElementById("f-year"), [["2024", "2024"], ["2025", "2025"], ["2026", "2026"]], year, (v) => { year = v; renderAll(); }, t("districts.year"));
+  seg(document.getElementById("f-measure"), [["total", t("districts.total")], ["per", t("districts.per_resident")]], measure,
+    (v) => { measure = v; renderSelection(); }, t("districts.measure"));
   renderAll();
-})();
+});
 </script>
 </body>
 </html>

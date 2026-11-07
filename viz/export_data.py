@@ -7,6 +7,10 @@ Usage:
     python viz/export_data.py [--db data/yerevan_budget.duckdb] [--out viz/mockups/data.js]
 
 All amounts are converted from thousand AMD (as in the source documents) to million AMD.
+Names from the database (functional classes, districts, programmes) are exported in every language of the
+database as objects {"hy": ..., "en": ..., "ru": ..., ...}; the pages pick the language of the interface
+(assets/common.js). The other labels (short section names, revenue and economic groups) are interface strings
+in assets/i18n/<lang>/common.js; the English ones below are their keys' fallbacks.
 """
 
 from __future__ import annotations
@@ -70,6 +74,25 @@ M = 1000.0  # thousand AMD -> million AMD
 
 def mln(v):
     return None if v is None else round(v / M, 1)
+
+
+def langs(con):
+    """Languages of the database: hy (source) and every translation (columns name_<lang> of dim_functional)."""
+    cols = [r[0] for r in con.execute("DESCRIBE dim_functional").fetchall()]
+    return ["hy"] + [c[5:] for c in cols if c.startswith("name_") and c != "name_hy"]
+
+
+def names(row, prefix, languages):
+    """{"hy": ..., "en": ..., ...} from the columns <prefix>_<lang> of a row (empty ones left out)."""
+    return {lang: row[f"{prefix}_{lang}"].strip() for lang in languages if row.get(f"{prefix}_{lang}")}
+
+
+def program_name(text):
+    """Programme names are numbered within their class ("15. Passenger transportation ...")."""
+    text = (text or "").strip()
+    if ". " in text[:5]:
+        text = text.split(". ", 1)[1]
+    return text.lstrip("- ").strip()
 
 
 def q(con, sql, params=None):
@@ -167,46 +190,56 @@ def classes_by_period(con):
             if any(r[k] for k in ("approved", "revised", "actual"))]
 
 
-def hierarchy(con, years):
-    """Approved budget: functional section -> class -> programme (budget appendix 6, city total)."""
+def hierarchy(con, years, languages, table):
+    """Approved budget: functional section -> class -> programme (budget appendix 6, city total).
+
+    Names of classes and programmes are indexes into ``table`` (the multilingual names, shared by the years)."""
     out = {}
+    index: dict[str, int] = {}
+
+    def ref(name: dict) -> int:
+        key = json.dumps(name, ensure_ascii=False, sort_keys=True)
+        if key not in index:
+            index[key] = len(table)
+            table.append(name)
+        return index[key]
+
+    class_names = {r["func_code"]: names(r, "name", languages)
+                   for r in q(con, "SELECT func_code, COLUMNS('^name_') FROM dim_functional")}
     for year in years:
         classes = q(con, """
-            SELECT func_code, any_value(label_en) AS label, max(total_kamd) AS total
+            SELECT func_code, any_value(COLUMNS('^label_')), max(total_kamd) AS total
             FROM v_budget_program
             WHERE fiscal_year = ? AND doc_type = 'budget' AND appendix = 6 AND row_type = 'functional'
               AND func_code NOT LIKE '%.0' GROUP BY func_code ORDER BY func_code""", [year])
         progs = q(con, """
-            SELECT func_code, label_en, label_hy, total_kamd AS total, seq
+            SELECT func_code, COLUMNS('^label_'), total_kamd AS total, seq
             FROM v_budget_program
             WHERE fiscal_year = ? AND doc_type = 'budget' AND appendix = 6 AND row_type = 'program'
             ORDER BY seq""", [year])
-        names = {r["func_code"]: r["name_en"] for r in q(con, "SELECT func_code, name_en FROM dim_functional")}
         tree = {}
         for c in classes:
             sec = c["func_code"][:2]
             tree.setdefault(sec, {"code": sec, "name": SECTIONS.get(sec, sec), "children": []})
             tree[sec]["children"].append({
-                "code": c["func_code"], "name": names.get(c["func_code"]) or c["label"],
+                "code": c["func_code"], "name": ref(class_names.get(c["func_code"]) or names(c, "label", languages)),
                 "total": mln(c["total"]), "children": []})
         by_class = {c["code"]: c for s in tree.values() for c in s["children"]}
         for p in progs:
             cls = by_class.get(p["func_code"])
             if cls is None or p["total"] is None:
                 continue
-            label = (p["label_en"] or p["label_hy"] or "").strip()
-            # programme names are numbered within their class ("15. Passenger transportation ...")
-            if ". " in label[:5]:
-                label = label.split(". ", 1)[1]
-            label = label.lstrip("- ").strip()
+            name = {lang: program_name(v) for lang, v in names(p, "label", languages).items()}
+            label = name.get("en") or name.get("hy") or ""
             # internal transfer between the administrative and the fund parts: not spending
             if "reserve fund" in label.lower() and "fund" in label.lower().replace("reserve fund", ""):
                 continue
-            cls["children"].append({"name": label, "total": mln(p["total"])})
+            cls["children"].append({"name": ref(name), "total": mln(p["total"])})
         for cls in by_class.values():
             rest = (cls["total"] or 0) - sum(p["total"] for p in cls["children"])
-            if rest > 1:  # class amount not broken down into programmes
-                cls["children"].append({"name": "Not itemised by programme", "total": round(rest, 1)})
+            if rest > 1:  # class amount not broken down into programmes (interface string data.not_itemised)
+                cls["children"].append({"key": "not_itemised", "name": "Not itemised by programme",
+                                        "total": round(rest, 1)})
         out[str(year)] = sorted(tree.values(), key=lambda s: s["code"])
     return out
 
@@ -301,15 +334,19 @@ def main():
 
     con = duckdb.connect(args.db, read_only=True)
     years = [2024, 2025, 2026]
-    names = q(con, "SELECT func_code, name_en FROM dim_functional WHERE level = 'class'")
-    dist = q(con, "SELECT district_code, name_en, name_hy, sort_order FROM dim_district ORDER BY sort_order")
+    languages = langs(con)
+    name_table: list[dict] = []
+    classes = q(con, "SELECT func_code, COLUMNS('^name_') FROM dim_functional WHERE level = 'class'")
+    dist = q(con, "SELECT district_code, COLUMNS('^name_'), sort_order FROM dim_district ORDER BY sort_order")
     data = {
         "generated": dt.date.today().isoformat(),
+        "languages": languages,
         "unit": "million AMD",
         "source": "Yerevan Municipality, Finance section (yerevan.am/hy/finance); opendataam/arm-yerevan-budget",
         "sections": SECTIONS,
-        "class_names": {r["func_code"]: r["name_en"] for r in names},
-        "district_names": [{"code": r["district_code"], "name": r["name_en"], "name_hy": r["name_hy"]} for r in dist],
+        "class_names": {r["func_code"]: names(r, "name", languages) for r in classes},
+        "district_names": [{"code": r["district_code"], "name": names(r, "name", languages),
+                            "name_hy": r["name_hy"]} for r in dist],
         "econ_groups": [{"key": k, "label": label} for k, label, _ in ECON_GROUPS],
         "summary": summary(con),
         "periods": periods(con),
@@ -317,7 +354,8 @@ def main():
         "functions_by_period": functions_by_period(con),
         "classes_by_period": classes_by_period(con),
         "population_2022": POPULATION_2022,
-        "hierarchy": hierarchy(con, years),
+        "hierarchy": hierarchy(con, years, languages, name_table),
+        "names": name_table,
         "revenue": revenue_groups(con),
         "economic": economic_by_year(con),
         "districts": districts(con, years),

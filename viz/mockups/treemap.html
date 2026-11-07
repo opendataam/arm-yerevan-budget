@@ -3,19 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Where Yerevan's Money Goes</title>
+<title data-i18n="treemap.title">Where Yerevan's Money Goes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Armenian:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <style>
   .top-list { display: grid; gap: 10px; }
-  .top-item { display: grid; gap: 4px; cursor: pointer; border-radius: 6px; padding: 4px 6px; margin: 0 -6px; background: none; border: 0; text-align: left; font: inherit; color: inherit; }
+  .top-item { display: grid; gap: 4px; cursor: pointer; border-radius: 6px; padding: 4px 6px; margin: 0 -6px; background: none; border: 0; text-align: start; font: inherit; color: inherit; }
   .top-item:hover { background: var(--hover); }
   .top-item .row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; }
   .top-item .row b { font-variant-numeric: tabular-nums; white-space: nowrap; }
   .top-item .meta { font-size: 11.5px; color: var(--muted); }
-  .bar { height: 6px; border-radius: 3px; background: var(--line); }
+  .bar { height: 6px; border-radius: 3px; background: var(--line); direction: ltr; }
   .bar > span { display: block; height: 100%; border-radius: 3px; }
   .search { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
   .search input { min-width: min(100%, 280px); }
@@ -24,17 +24,17 @@
 <body>
 <main class="page">
   <div class="page-head">
-    <h1>Where the money goes</h1>
-    <p class="lede">Every dram of the approved budget, nested from function to sub-function to programme. Click a block to zoom in, use the path below the map to step back.</p>
+    <h1 data-i18n="treemap.h1">Where the money goes</h1>
+    <p class="lede" data-i18n="treemap.lede">Every dram of the approved budget, nested from function to sub-function to programme. Click a block to zoom in, use the path below the map to step back.</p>
     <div class="pattern">
-      <span><b>Pattern:</b> drill-down treemap and sunburst, as in OpenSpending Viewer, Civio Presupuesto and the USAspending Spending Explorer</span>
+      <span data-i18n-html="treemap.pattern"><b>Pattern:</b> drill-down treemap and sunburst, as in OpenSpending Viewer, Civio Presupuesto and the USAspending Spending Explorer</span>
       <span class="chip">ECharts treemap · sunburst</span>
     </div>
   </div>
 
   <div class="filters">
-    <div class="filter"><span>Budget year</span><span id="f-year"></span></div>
-    <div class="filter"><span>View</span><span id="f-view"></span></div>
+    <div class="filter"><span data-i18n="treemap.f_year">Budget year</span><span id="f-year"></span></div>
+    <div class="filter"><span data-i18n="treemap.f_view">View</span><span id="f-view"></span></div>
   </div>
 
   <div class="grid grid-3">
@@ -45,19 +45,19 @@
           <p id="map-sub"></p>
         </div>
       </div>
-      <div class="chart xtall" id="c-map" role="img" aria-label="Treemap of the approved budget by function, sub-function and programme"></div>
+      <div class="chart xtall" id="c-map" role="img" aria-label="Treemap of the approved budget by function, sub-function and programme" data-i18n-attr="aria-label:treemap.map_aria"></div>
       <p class="note" id="map-note"></p>
     </section>
     <aside class="card">
-      <div class="card-head"><div><h2>Largest programmes</h2><p>Click one to find it in the map.</p></div></div>
+      <div class="card-head"><div><h2 data-i18n="treemap.top_h2">Largest programmes</h2><p data-i18n="treemap.top_sub">Click one to find it in the map.</p></div></div>
       <div class="top-list" id="top"></div>
     </aside>
   </div>
 
   <section class="card">
     <div class="card-head">
-      <div><h2>All programmes</h2><p>The same figures as a searchable table.</p></div>
-      <div class="search"><label for="q">Search</label><input type="search" id="q" placeholder="e.g. metro, kindergarten, waste"></div>
+      <div><h2 data-i18n="treemap.all_h2">All programmes</h2><p data-i18n="treemap.all_sub">The same figures as a searchable table.</p></div>
+      <div class="search"><label for="q" data-i18n="treemap.search">Search</label><input type="search" id="q" placeholder="e.g. metro, kindergarten, waste" data-i18n-attr="placeholder:treemap.search_placeholder"></div>
     </div>
     <div class="table-wrap" id="tbl"></div>
   </section>
@@ -67,8 +67,8 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <script src="assets/common.js"></script>
 <script>
-(function () {
-  const { B, css, el, amd, short, pct, esc, base, chart, seg, table, sectionColor } = YB;
+YB.ready("treemap", function () {
+  const { B, css, el, t, num, amd, short, pct, esc, base, chart, seg, table, sectionColor } = YB;
   YB.header("treemap.html");
 
   let year = "2026", view = "treemap", focus = null;
@@ -105,14 +105,14 @@
   }
 
   function tooltip(info, gross) {
-    const path = (info.treePathInfo || []).slice(1).map((t) => t.name);
+    const path = (info.treePathInfo || []).slice(1).map((n) => n.name);
     const parent = info.treePathInfo && info.treePathInfo.length > 2 ? info.treePathInfo[info.treePathInfo.length - 2].value : null;
     return `<div style="max-width:280px;white-space:normal">` +
       `<div style="color:${css("--muted")};font-size:11.5px">${path.slice(0, -1).map(esc).join(" › ")}</div>` +
       `<div style="font-weight:650;margin:2px 0">${esc(info.name)}</div>` +
       `<b style="font-size:15px;font-variant-numeric:tabular-nums">${esc(amd(info.value))}</b>` +
-      `<span style="color:${css("--ink-2")}"> · ${pct(info.value / gross, 1)} of the budget` +
-      (parent && path.length > 1 ? ` · ${pct(info.value / parent)} of the level above` : "") + `</span></div>`;
+      `<span style="color:${css("--ink-2")}"> · ${esc(t("treemap.tip_share", { pct: pct(info.value / gross, 1) }))}` +
+      (parent && path.length > 1 ? ` · ${esc(t("treemap.tip_parent", { pct: pct(info.value / parent) }))}` : "") + `</span></div>`;
   }
 
   function option() {
@@ -123,7 +123,7 @@
     const surface = css("--surface");
     if (view === "treemap") {
       o.series = [{
-        type: "treemap", name: "All functions", data, roam: false, nodeClick: "zoomToNode", leafDepth: 2,
+        type: "treemap", name: t("treemap.all_functions"), data, roam: false, nodeClick: "zoomToNode", leafDepth: 2,
         top: 4, left: 0, right: 0, bottom: 34, squareRatio: 0.9,
         breadcrumb: {
           show: true, bottom: 0, left: 0, height: 24,
@@ -157,7 +157,7 @@
         ],
       }];
       o.graphic = [{ type: "text", left: "center", top: "middle", silent: true,
-        style: { text: `AMD\n${(gross / 1000).toFixed(1)} bn`, align: "center", fill: css("--ink"), font: `700 15px ${css("--font-body")}` } }];
+        style: { text: t("treemap.centre", { n: num(gross / 1000, 1) }), align: "center", fill: css("--ink"), font: `700 15px ${css("--font-body")}` } }];
     }
     return o;
   }
@@ -168,13 +168,11 @@
   function render() {
     const { secs, gross, neg } = build(year);
     m.render();
-    document.getElementById("map-title").textContent = `${year === "2026" ? "Approved budget 2026" : `Approved budget ${year}`}`;
-    document.getElementById("map-sub").textContent =
-      `Gross allocations: ${amd(gross)}. Sizes are proportional to money; colours follow the ten budget functions.`;
-    const note = document.getElementById("map-note");
-    note.replaceChildren(el("b", { text: "Offsets: " }),
-      `the budget books ${amd(-neg)} of land and property sale proceeds as negative spending under “Economic affairs n.e.c.”. ` +
-      `The map leaves them out, so it adds up to ${amd(gross)} rather than the net ${amd(gross + neg)}.`);
+    document.getElementById("map-title").textContent = t("treemap.map_title", { year });
+    document.getElementById("map-sub").textContent = t("treemap.map_sub", { gross: amd(gross) });
+    // HTML string: the values are amounts formatted here, escaped
+    document.getElementById("map-note").innerHTML =
+      t("treemap.map_note", { neg: esc(amd(-neg)), gross: esc(amd(gross)), net: esc(amd(gross + neg)) });
 
     /* top programmes */
     const progs = [];
@@ -209,22 +207,22 @@
   const tbl = document.getElementById("tbl");
   const q = document.getElementById("q");
   function fillTable() {
-    const needle = q.value.trim().toLowerCase();
-    const rows = needle ? allRows.filter((r) => `${r.fn} ${r.sub} ${r.name}`.toLowerCase().includes(needle)) : allRows;
+    const needle = q.value.trim().toLocaleLowerCase(YB.lang);
+    const rows = needle ? allRows.filter((r) => `${r.fn} ${r.sub} ${r.name}`.toLocaleLowerCase(YB.lang).includes(needle)) : allRows;
     table(tbl, [
-      { key: "name", label: "Programme" },
-      { key: "sub", label: "Sub-function" },
-      { key: "fn", label: "Function" },
-      { key: "value", label: "AMD", num: true, fmt: short },
-      { key: "share", label: "Share", num: true, fmt: (v) => pct(v, 1) },
+      { key: "name", label: t("treemap.col_programme") },
+      { key: "sub", label: t("treemap.col_subfunction") },
+      { key: "fn", label: t("treemap.col_function") },
+      { key: "value", label: t("treemap.col_amd"), num: true, fmt: short },
+      { key: "share", label: t("treemap.col_share"), num: true, fmt: (v) => pct(v, 1) },
     ], rows);
   }
   q.addEventListener("input", fillTable);
 
-  seg(document.getElementById("f-year"), [["2024", "2024"], ["2025", "2025"], ["2026", "2026"]], year, (v) => { year = v; render(); }, "Budget year");
-  seg(document.getElementById("f-view"), [["treemap", "Treemap"], ["sunburst", "Sunburst"]], view, (v) => { view = v; render(); }, "View");
+  seg(document.getElementById("f-year"), [["2024", "2024"], ["2025", "2025"], ["2026", "2026"]], year, (v) => { year = v; render(); }, t("treemap.f_year"));
+  seg(document.getElementById("f-view"), [["treemap", t("treemap.view_treemap")], ["sunburst", t("treemap.view_sunburst")]], view, (v) => { view = v; render(); }, t("treemap.f_view"));
   render();
-})();
+});
 </script>
 </body>
 </html>

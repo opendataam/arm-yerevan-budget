@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Yerevan Budget at a Glance</title>
+<title data-i18n="overview.title">Yerevan Budget at a Glance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Armenian:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <style>
   .econ { display: grid; gap: 0; }
@@ -17,9 +17,9 @@
   .econ-row:last-child { border-bottom: 0; }
   .econ-row.head { font-size: 12px; color: var(--muted); padding-top: 0; }
   .econ-name { font-size: 13.5px; font-weight: 550; }
-  .econ-val { text-align: right; font-weight: 650; font-variant-numeric: tabular-nums; }
-  .econ-share { text-align: right; color: var(--ink-2); font-variant-numeric: tabular-nums; font-size: 13px; }
-  .spark { width: 100%; height: 34px; display: block; }
+  .econ-val { text-align: end; font-weight: 650; font-variant-numeric: tabular-nums; }
+  .econ-share { text-align: end; color: var(--ink-2); font-variant-numeric: tabular-nums; font-size: 13px; }
+  .spark { width: 100%; height: 34px; display: block; direction: ltr; }
   .spark rect { fill: var(--q4); }
   .spark rect.neg { fill: var(--muted); }
   .spark rect.last { fill: var(--q6); }
@@ -35,59 +35,59 @@
 <body>
 <main class="page">
   <div class="page-head">
-    <h1>Yerevan budget at a glance</h1>
-    <p class="lede">Ten years of the city budget on one screen: what the Council approved, what was collected and spent, and how spending splits between city functions.</p>
+    <h1 data-i18n="overview.h1">Yerevan budget at a glance</h1>
+    <p class="lede" data-i18n="overview.lede">Ten years of the city budget on one screen: what the Council approved, what was collected and spent, and how spending splits between city functions.</p>
     <div class="pattern">
-      <span><b>Pattern:</b> portal landing page with headline figures and trends, as in Gobierto and USAspending agency profiles</span>
+      <span data-i18n-html="overview.pattern"><b>Pattern:</b> portal landing page with headline figures and trends, as in Gobierto and USAspending agency profiles</span>
       <span class="chip">Apache ECharts</span>
     </div>
   </div>
 
-  <section class="tiles" id="tiles" aria-label="Headline figures"></section>
+  <section class="tiles" id="tiles" aria-label="Headline figures" data-i18n-attr="aria-label:overview.tiles_aria"></section>
 
   <section class="card">
     <div class="card-head">
       <div>
-        <h2>Revenue and spending, 2017–2026</h2>
-        <p>AMD billion. Approved budget, revised plan and actual result of each year. 2026 shows the approved budget only.</p>
+        <h2 data-i18n="overview.lines_h2">Revenue and spending, 2017–2026</h2>
+        <p data-i18n="overview.lines_sub">AMD billion. Approved budget, revised plan and actual result of each year. 2026 shows the approved budget only.</p>
       </div>
-      <button class="toggle-table" type="button" id="t1-btn" aria-expanded="false">Show table</button>
+      <button class="toggle-table" type="button" id="t1-btn" aria-expanded="false" data-i18n="ui.show_table">Show table</button>
     </div>
     <div class="legend" id="legend-lines"></div>
     <div class="grid grid-2">
-      <div><h3>Revenue</h3><div class="chart" id="c-rev" role="img" aria-label="Line chart of revenue by year"></div></div>
-      <div><h3>Spending</h3><div class="chart" id="c-exp" role="img" aria-label="Line chart of spending by year"></div></div>
+      <div><h3 data-i18n="overview.revenue">Revenue</h3><div class="chart" id="c-rev" role="img" aria-label="Line chart of revenue by year" data-i18n-attr="aria-label:overview.rev_aria"></div></div>
+      <div><h3 data-i18n="overview.spending">Spending</h3><div class="chart" id="c-exp" role="img" aria-label="Line chart of spending by year" data-i18n-attr="aria-label:overview.exp_aria"></div></div>
     </div>
     <div class="table-wrap" id="t1" hidden></div>
-    <p class="note"><b>Gaps:</b> the 2020 annual report has no revenue table, so 2020 revenue execution is missing. Revised plans can exceed the approved budget when the Council adds the previous year's free balance.</p>
+    <p class="note" data-i18n-html="overview.lines_note"><b>Gaps:</b> the 2020 annual report has no revenue table, so 2020 revenue execution is missing. Revised plans can exceed the approved budget when the Council adds the previous year's free balance.</p>
   </section>
 
   <section class="card">
     <div class="card-head">
       <div>
-        <h2>Spending by function</h2>
-        <p>Actual spending 2017–2025, approved budget for 2026. Functional classification of the budget, first level.</p>
+        <h2 data-i18n="overview.func_h2">Spending by function</h2>
+        <p data-i18n="overview.func_sub">Actual spending 2017–2025, approved budget for 2026. Functional classification of the budget, first level.</p>
       </div>
       <div class="filters">
         <div id="mode"></div>
-        <button class="toggle-table" type="button" id="t2-btn" aria-expanded="false">Show table</button>
+        <button class="toggle-table" type="button" id="t2-btn" aria-expanded="false" data-i18n="ui.show_table">Show table</button>
       </div>
     </div>
     <div class="legend" id="legend-func"></div>
-    <div class="chart tall" id="c-func" role="img" aria-label="Stacked bar chart of spending by function and year"></div>
+    <div class="chart tall" id="c-func" role="img" aria-label="Stacked bar chart of spending by function and year" data-i18n-attr="aria-label:overview.func_aria"></div>
     <div class="table-wrap" id="t2" hidden></div>
-    <p class="note"><b>Economic affairs</b> is mostly transport: public bus and trolleybus services, metro, roads. <b>Other</b> joins health, defence, public order and reserve funds (under 1% together).</p>
+    <p class="note" data-i18n-html="overview.func_note"><b>Economic affairs</b> is mostly transport: public bus and trolleybus services, metro, roads. <b>Other</b> joins health, defence, public order and reserve funds (under 1% together).</p>
   </section>
 
   <section class="card">
     <div class="card-head">
       <div>
-        <h2>What the money buys</h2>
-        <p>Economic classification. Bars: 2017–2026, each row on its own scale; 2020 is missing in the source. Values: 2026 approved budget.</p>
+        <h2 data-i18n="overview.econ_h2">What the money buys</h2>
+        <p data-i18n="overview.econ_sub">Economic classification. Bars: 2017–2026, each row on its own scale; 2020 is missing in the source. Values: 2026 approved budget.</p>
       </div>
     </div>
     <div class="econ" id="econ"></div>
-    <p class="note"><b>Subsidies</b> go to the city's own non-commercial organisations (transport companies, kindergartens, waste collection, culture), which is why they dominate. Sales of land and property are booked as negative spending.</p>
+    <p class="note" data-i18n-html="overview.econ_note"><b>Subsidies</b> go to the city's own non-commercial organisations (transport companies, kindergartens, waste collection, culture), which is why they dominate. Sales of land and property are booked as negative spending.</p>
   </section>
 </main>
 
@@ -95,8 +95,8 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <script src="assets/common.js"></script>
 <script>
-(function () {
-  const { B, css, el, amd, short, pct, dram, esc, base, axis, chart, tipRow, seg, table, tableToggle, sectionColor, sectionName } = YB;
+YB.ready("overview", function () {
+  const { B, css, el, t, num, bn, amd, short, pct, dram, esc, base, axis, chart, tipRow, seg, table, tableToggle, sectionColor, sectionName } = YB;
   YB.header("overview.html");
 
   const S = Object.fromEntries(B.summary.map((r) => [r.year, r]));
@@ -108,14 +108,14 @@
   const e26 = S[2026].expenditure_budget, r26 = S[2026].revenue_budget, e25 = S[2025].expenditure_budget;
   const p9 = B.periods.find((p) => p.year === 2026 && p.period === "9M" && p.statement === "expenditure");
   const tiles = [
-    { label: "2026 approved spending", value: (e26 / 1000).toFixed(1), unit: "bn AMD",
-      sub: `${e26 >= e25 ? "+" : "−"}${pct(Math.abs(e26 / e25 - 1), 1)} vs 2025 approved budget` },
-    { label: "2026 approved revenue", value: (r26 / 1000).toFixed(1), unit: "bn AMD",
-      sub: `${amd(e26 - r26)} deficit covered by financing` },
-    { label: "Spent in January–September 2026", value: pct(p9.actual / p9.revised), unit: "",
-      sub: `${amd(p9.actual)} of the ${amd(p9.revised)} revised plan`, meter: p9.actual / p9.revised },
-    { label: "Spending per resident, 2026", value: dram(e26 * 1e6 / pop), unit: "AMD",
-      sub: `about AMD ${dram(e26 * 1e6 / pop / 365)} a day · ${dram(pop)} residents (2022 census)` },
+    { label: t("overview.tile_spend"), value: bn(e26), unit: t("overview.unit_bn"),
+      sub: t("overview.tile_spend_sub", { change: `${e26 >= e25 ? "+" : "−"}${pct(Math.abs(e26 / e25 - 1), 1)}` }) },
+    { label: t("overview.tile_rev"), value: bn(r26), unit: t("overview.unit_bn"),
+      sub: t("overview.tile_rev_sub", { deficit: amd(e26 - r26) }) },
+    { label: t("overview.tile_exec"), value: pct(p9.actual / p9.revised), unit: "",
+      sub: t("overview.tile_exec_sub", { actual: amd(p9.actual), plan: amd(p9.revised) }), meter: p9.actual / p9.revised },
+    { label: t("overview.tile_resident"), value: dram(e26 * 1e6 / pop), unit: t("overview.unit_amd"),
+      sub: t("overview.tile_resident_sub", { day: dram(e26 * 1e6 / pop / 365), residents: dram(pop) }) },
   ];
   const tilesNode = document.getElementById("tiles");
   for (const t of tiles) {
@@ -127,9 +127,9 @@
 
   /* revenue & spending lines */
   const LINES = [
-    { key: "actual", label: "Actual", color: "--s1" },
-    { key: "approved", label: "Approved budget", color: "--s3" },
-    { key: "revised", label: "Revised plan", color: "--s2" },
+    { key: "actual", label: t("overview.actual"), color: "--s1" },
+    { key: "approved", label: t("overview.approved"), color: "--s3" },
+    { key: "revised", label: t("overview.revised"), color: "--s2" },
   ];
   const leg = document.getElementById("legend-lines");
   for (const l of LINES) leg.append(el("span", null, [el("i", { class: "line", style: `background:var(${l.color})` }), l.label]));
@@ -150,11 +150,11 @@
         trigger: "axis",
         axisPointer: { type: "line", lineStyle: { color: css("--axis") } },
         formatter: (ps) => `<div style="font-weight:600;margin-bottom:2px">${esc(ps[0].axisValue)}</div>` +
-          ps.map((p) => tipRow(p.color, p.value == null ? "n/a" : amd(p.value), p.seriesName)).join(""),
+          ps.map((p) => tipRow(p.color, p.value == null ? t("fmt.na") : amd(p.value), p.seriesName)).join(""),
       }),
       xAxis: axis({ type: "category", data: years.map(String), boundaryGap: false, splitLine: { show: false } }),
       yAxis: axis({ type: "value", min: 0, max: yMax, interval: 40000, axisLine: { show: false },
-        axisLabel: { color: css("--muted"), formatter: (v) => `${v / 1000}` } }),
+        axisLabel: { color: css("--muted"), formatter: (v) => num(v / 1000) } }),
       series: LINES.map((l) => {
         const vals = data[l.key];
         let last = -1; vals.forEach((v, i) => { if (v != null) last = i; });
@@ -175,19 +175,19 @@
 
   const t1 = document.getElementById("t1");
   tableToggle(document.getElementById("t1-btn"), t1, () => table(t1, [
-    { key: "year", label: "Year" },
-    { key: "ra", label: "Revenue, approved", num: true, fmt: short },
-    { key: "rr", label: "Revenue, revised", num: true, fmt: short },
-    { key: "rx", label: "Revenue, actual", num: true, fmt: short },
-    { key: "ea", label: "Spending, approved", num: true, fmt: short },
-    { key: "er", label: "Spending, revised", num: true, fmt: short },
-    { key: "ex", label: "Spending, actual", num: true, fmt: short },
+    { key: "year", label: t("overview.col_year") },
+    { key: "ra", label: t("overview.col_rev_approved"), num: true, fmt: short },
+    { key: "rr", label: t("overview.col_rev_revised"), num: true, fmt: short },
+    { key: "rx", label: t("overview.col_rev_actual"), num: true, fmt: short },
+    { key: "ea", label: t("overview.col_exp_approved"), num: true, fmt: short },
+    { key: "er", label: t("overview.col_exp_revised"), num: true, fmt: short },
+    { key: "ex", label: t("overview.col_exp_actual"), num: true, fmt: short },
   ], years.map((y) => ({ year: y, ra: approvedOf(S[y], "revenue"), rr: S[y].revenue_revised, rx: S[y].revenue_actual,
     ea: approvedOf(S[y], "expenditure"), er: S[y].expenditure_revised, ex: S[y].expenditure_actual }))));
 
   /* spending by function */
   const GROUPS = ["04", "09", "01", "05", "06", "08", "10", "other"];
-  const groupName = (g) => (g === "other" ? "Other" : sectionName(g));
+  const groupName = (g) => (g === "other" ? t("overview.other") : sectionName(g));
   const groupColor = (g) => (g === "other" ? css("--s-other") : sectionColor(g));
   const fYears = [...new Set(B.functions_by_year.map((r) => r.year))].sort();
   const fv = {};
@@ -214,9 +214,9 @@
             tipRow(p.color, `${short(fv[y][p.seriesId])} · ${pct(fv[y][p.seriesId] / tot)}`, p.seriesName)).join("");
       },
     }),
-    xAxis: axis({ type: "category", data: fYears.map((y) => (y === 2026 ? "2026 plan" : String(y))), splitLine: { show: false } }),
+    xAxis: axis({ type: "category", data: fYears.map((y) => (y === 2026 ? t("overview.year_plan", { year: y }) : String(y))), splitLine: { show: false } }),
     yAxis: axis({ type: "value", axisLine: { show: false }, max: mode === "share" ? 1 : null,
-      axisLabel: { color: css("--muted"), formatter: (v) => (mode === "share" ? `${Math.round(v * 100)}%` : `${v / 1000}`) } }),
+      axisLabel: { color: css("--muted"), formatter: (v) => (mode === "share" ? pct(v) : num(v / 1000)) } }),
     series: GROUPS.map((g) => ({
       id: g, name: groupName(g), type: "bar", stack: "f", barWidth: "58%",
       itemStyle: { color: groupColor(g), borderColor: css("--surface"), borderWidth: 1 },
@@ -224,10 +224,10 @@
       data: fYears.map((y) => (mode === "share" ? (fv[y][g] || 0) / fTotal(y) : (fv[y][g] || 0))),
     })),
   }));
-  seg(document.getElementById("mode"), [["amd", "AMD"], ["share", "Share"]], mode, (v) => { mode = v; funcChart.render(); }, "Units");
+  seg(document.getElementById("mode"), [["amd", t("overview.mode_amd")], ["share", t("overview.mode_share")]], mode, (v) => { mode = v; funcChart.render(); }, t("overview.units"));
   const t2 = document.getElementById("t2");
   tableToggle(document.getElementById("t2-btn"), t2, () => table(t2,
-    [{ key: "name", label: "Function" }].concat(fYears.map((y) => ({ key: String(y), label: y === 2026 ? "2026 plan" : String(y), num: true, fmt: short }))),
+    [{ key: "name", label: t("overview.col_function") }].concat(fYears.map((y) => ({ key: String(y), label: y === 2026 ? t("overview.year_plan", { year: y }) : String(y), num: true, fmt: short }))),
     GROUPS.map((g) => Object.assign({ name: groupName(g) }, Object.fromEntries(fYears.map((y) => [String(y), fv[y][g] || 0]))))));
 
   /* economic classification: sparkline rows */
@@ -235,8 +235,8 @@
   const eYears = years.filter((y) => y >= 2017);
   const byYear = Object.fromEntries(E.map((r) => [r.year, r]));
   const econ = document.getElementById("econ");
-  econ.append(el("div", { class: "econ-row head" }, [el("span", { text: "Item" }), el("span", { text: "2017 → 2026" }),
-    el("span", { class: "econ-val", text: "2026 plan" }), el("span", { class: "econ-share", text: "Share" })]));
+  econ.append(el("div", { class: "econ-row head" }, [el("span", { text: t("overview.col_item") }), el("span", { class: "ltr", text: "2017 → 2026" }),
+    el("span", { class: "econ-val", text: t("overview.year_plan", { year: 2026 }) }), el("span", { class: "econ-share", text: t("overview.mode_share") })]));
   const ns = "http://www.w3.org/2000/svg";
   const last = byYear[2026];
   const gross = B.econ_groups.filter((g) => g.key !== "asset_sales").reduce((a, g) => a + last[g.key], 0);
@@ -252,17 +252,17 @@
       r.setAttribute("x", i * 10 + 1.5); r.setAttribute("width", 7); r.setAttribute("y", 34 - h); r.setAttribute("height", h);
       r.setAttribute("rx", 1.5);
       r.setAttribute("class", v == null ? "na" : v < 0 ? "neg" : i === vals.length - 1 ? "last" : "");
-      const t = document.createElementNS(ns, "title"); t.textContent = `${eYears[i]}: ${v == null ? "no data" : amd(v)}`;
-      r.append(t); svg.append(r);
+      const tt = document.createElementNS(ns, "title"); tt.textContent = `${eYears[i]}: ${v == null ? t("overview.no_data") : amd(v)}`;
+      r.append(tt); svg.append(r);
     });
     econ.append(el("div", { class: "econ-row" }, [
       el("span", { class: "econ-name", text: g.label }),
       el("span", { class: "spark-cell" }, svg),
       el("span", { class: "econ-val", text: short(last[g.key]) }),
-      el("span", { class: "econ-share", text: g.key === "asset_sales" ? "offset" : pct(last[g.key] / gross) }),
+      el("span", { class: "econ-share", text: g.key === "asset_sales" ? t("overview.offset") : pct(last[g.key] / gross) }),
     ]));
   }
-})();
+});
 </script>
 </body>
 </html>

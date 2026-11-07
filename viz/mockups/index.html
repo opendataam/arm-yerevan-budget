@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Yerevan Budget Visualization Mockups</title>
+<title data-i18n="index.title">Yerevan Budget Visualization Mockups</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Armenian:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <style>
   .gallery { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); }
@@ -15,7 +15,7 @@
     border-radius: var(--radius); overflow: hidden; text-decoration: none; color: inherit; transition: border-color 0.15s, transform 0.15s;
   }
   .mock:hover { border-color: var(--accent); transform: translateY(-2px); }
-  .mock svg { display: block; width: 100%; height: auto; background: color-mix(in srgb, var(--bg) 60%, var(--surface)); border-bottom: 1px solid var(--line); }
+  .mock svg { display: block; width: 100%; height: auto; background: color-mix(in srgb, var(--bg) 60%, var(--surface)); border-bottom: 1px solid var(--line); direction: ltr; }
   .mock .body { padding: 14px 16px 16px; display: grid; gap: 6px; align-content: start; }
   .mock .num { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
   .mock h3 { font-size: 16.5px; }
@@ -34,28 +34,28 @@
   .rec { border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; display: grid; gap: 8px; align-content: start; background: var(--surface); }
   .rec.pick { border-color: var(--accent); box-shadow: inset 0 3px 0 var(--accent); }
   .rec .tag { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em; }
-  .rec ul { margin: 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); display: grid; gap: 4px; }
+  .rec ul { margin: 0; padding-inline-start: 18px; font-size: 13.5px; color: var(--ink-2); display: grid; gap: 4px; }
   .prose { max-width: 75ch; color: var(--ink-2); display: grid; gap: 10px; }
 </style>
 </head>
 <body>
 <main class="page">
   <div class="page-head">
-    <h1>Visualizing the Yerevan city budget</h1>
-    <p class="lede">Six interactive mockups built on the real budget data (2017–2026), each following a pattern proven by open budget portals, plus a review of the open-source tools that can build them.</p>
-    <div class="pattern"><span><b>Data:</b> budget decisions and form Հ-9 execution reports of the Yerevan Municipality, normalised in DuckDB by <span class="mono">opendataam/arm-yerevan-budget</span></span></div>
+    <h1 data-i18n="index.h1">Visualizing the Yerevan city budget</h1>
+    <p class="lede" data-i18n="index.lede">Six interactive mockups built on the real budget data (2017–2026), each following a pattern proven by open budget portals, plus a review of the open-source tools that can build them.</p>
+    <div class="pattern"><span data-i18n-html="index.data_note"><b>Data:</b> budget decisions and form Հ-9 execution reports of the Yerevan Municipality, normalised in DuckDB by <span class="mono">opendataam/arm-yerevan-budget</span></span></div>
   </div>
 
-  <section class="gallery" aria-label="Mockups">
+  <section class="gallery" aria-label="Mockups" data-i18n-attr="aria-label:ui.pages">
     <a class="mock" href="overview.html">
       <svg viewBox="0 0 300 120" aria-hidden="true">
         <rect x="16" y="16" width="62" height="30" rx="4" fill="var(--surface)" stroke="var(--line)"/><rect x="86" y="16" width="62" height="30" rx="4" fill="var(--surface)" stroke="var(--line)"/><rect x="156" y="16" width="62" height="30" rx="4" fill="var(--surface)" stroke="var(--line)"/><rect x="226" y="16" width="58" height="30" rx="4" fill="var(--surface)" stroke="var(--line)"/>
         <polyline points="20,96 50,92 80,94 110,86 140,80 170,70 200,66 230,62 260,52 280,50" fill="none" stroke="var(--s1)" stroke-width="2.5"/>
         <polyline points="20,88 50,90 80,84 110,74 140,82 170,76 200,70 230,60 260,44 280,46" fill="none" stroke="var(--s3)" stroke-width="2"/>
       </svg>
-      <div class="body"><span class="num">01 · Overview</span><h3>Budget at a glance</h3>
-        <p>Headline figures, ten-year trends of plan vs result, spending by function and by economic type.</p>
-        <span class="from">Like Gobierto, USAspending profiles · ECharts</span></div>
+      <div class="body"><span class="num">01 · <span data-i18n="index.m_overview_kind">Overview</span></span><h3 data-i18n="index.m_overview_h3">Budget at a glance</h3>
+        <p data-i18n="index.m_overview_desc">Headline figures, ten-year trends of plan vs result, spending by function and by economic type.</p>
+        <span class="from" data-i18n="index.m_overview_from">Like Gobierto, USAspending profiles · ECharts</span></div>
     </a>
     <a class="mock" href="treemap.html">
       <svg viewBox="0 0 300 120" aria-hidden="true">
@@ -64,9 +64,9 @@
         <rect x="232" y="12" width="52" height="50" rx="3" fill="var(--s4)"/><rect x="169" y="65" width="45" height="43" rx="3" fill="var(--s5)"/>
         <rect x="217" y="65" width="38" height="43" rx="3" fill="var(--s6)"/><rect x="258" y="65" width="26" height="43" rx="3" fill="var(--s7)"/>
       </svg>
-      <div class="body"><span class="num">02 · Composition</span><h3>Where the money goes</h3>
-        <p>Drill-down treemap and sunburst: function, sub-function, programme. Searchable programme table.</p>
-        <span class="from">Like OpenSpending Viewer, Civio, USAspending Explorer · ECharts</span></div>
+      <div class="body"><span class="num">02 · <span data-i18n="index.m_treemap_kind">Composition</span></span><h3 data-i18n="index.m_treemap_h3">Where the money goes</h3>
+        <p data-i18n="index.m_treemap_desc">Drill-down treemap and sunburst: function, sub-function, programme. Searchable programme table.</p>
+        <span class="from" data-i18n="index.m_treemap_from">Like OpenSpending Viewer, Civio, USAspending Explorer · ECharts</span></div>
     </a>
     <a class="mock" href="flow.html">
       <svg viewBox="0 0 300 120" aria-hidden="true">
@@ -78,9 +78,9 @@
         <rect x="140" y="38" width="8" height="64" fill="var(--ink)"/><rect x="262" y="14" width="8" height="38" fill="var(--s1)"/><rect x="262" y="56" width="8" height="34" fill="var(--s2)"/><rect x="262" y="94" width="8" height="12" fill="var(--s3)"/>
         <rect x="22" y="18" width="8" height="34" fill="var(--ink-2)"/><rect x="22" y="54" width="8" height="48" fill="var(--ink-2)"/>
       </svg>
-      <div class="body"><span class="num">03 · Flow</span><h3>From revenue to spending</h3>
-        <p>Sankey from revenue sources through the budget to functions and main services, with surplus or deficit.</p>
-        <span class="from">Like Open Budget Oakland / Sacramento · ECharts</span></div>
+      <div class="body"><span class="num">03 · <span data-i18n="index.m_flow_kind">Flow</span></span><h3 data-i18n="index.m_flow_h3">From revenue to spending</h3>
+        <p data-i18n="index.m_flow_desc">Sankey from revenue sources through the budget to functions and main services, with surplus or deficit.</p>
+        <span class="from" data-i18n="index.m_flow_from">Like Open Budget Oakland / Sacramento · ECharts</span></div>
     </a>
     <a class="mock" href="execution.html">
       <svg viewBox="0 0 300 120" aria-hidden="true">
@@ -89,9 +89,9 @@
         <g><rect x="20" y="78" width="120" height="14" rx="3" fill="var(--q1)"/><rect x="20" y="81" width="96" height="8" rx="3" fill="var(--s3)"/><rect x="110" y="75" width="2.5" height="20" fill="var(--ink)"/></g>
         <circle cx="270" cy="25" r="5" fill="var(--serious)"/><circle cx="270" cy="55" r="5" fill="var(--warning)"/><circle cx="270" cy="85" r="5" fill="var(--good)"/>
       </svg>
-      <div class="body"><span class="num">04 · Execution</span><h3>Plan vs actual</h3>
-        <p>Bullet bars per function with status, drill-down to sub-functions, quarterly pace compared across years.</p>
-        <span class="from">Like Civio “budgeted vs executed”, Gobierto execution · HTML + ECharts</span></div>
+      <div class="body"><span class="num">04 · <span data-i18n="index.m_execution_kind">Execution</span></span><h3 data-i18n="index.m_execution_h3">Plan vs actual</h3>
+        <p data-i18n="index.m_execution_desc">Bullet bars per function with status, drill-down to sub-functions, quarterly pace compared across years.</p>
+        <span class="from" data-i18n="index.m_execution_from">Like Civio “budgeted vs executed”, Gobierto execution · HTML + ECharts</span></div>
     </a>
     <a class="mock" href="districts.html">
       <svg viewBox="0 0 300 120" aria-hidden="true">
@@ -103,9 +103,9 @@
         </g>
         <g transform="translate(170 14)"><rect width="110" height="9" rx="2" fill="var(--s1)"/><rect y="16" width="100" height="9" rx="2" fill="var(--s1)"/><rect y="32" width="92" height="9" rx="2" fill="var(--s1)"/><rect y="48" width="80" height="9" rx="2" fill="var(--s1)"/><rect y="64" width="58" height="9" rx="2" fill="var(--s1)"/><rect y="80" width="24" height="9" rx="2" fill="var(--s1)"/></g>
       </svg>
-      <div class="body"><span class="num">05 · Territory</span><h3>Twelve districts</h3>
-        <p>Schematic tile map, ranking in total and per resident, spending mix and a district × function heatmap.</p>
-        <span class="from">Like Gobierto comparisons, Civio map · HTML + ECharts</span></div>
+      <div class="body"><span class="num">05 · <span data-i18n="index.m_districts_kind">Territory</span></span><h3 data-i18n="index.m_districts_h3">Twelve districts</h3>
+        <p data-i18n="index.m_districts_desc">Schematic tile map, ranking in total and per resident, spending mix and a district × function heatmap.</p>
+        <span class="from" data-i18n="index.m_districts_from">Like Gobierto comparisons, Civio map · HTML + ECharts</span></div>
     </a>
     <a class="mock" href="receipt.html">
       <svg viewBox="0 0 300 120" aria-hidden="true">
@@ -114,93 +114,93 @@
         <g fill="var(--muted)"><rect x="106" y="36" width="50" height="4" rx="2"/><rect x="170" y="36" width="24" height="4" rx="2"/><rect x="112" y="48" width="40" height="4" rx="2"/><rect x="174" y="48" width="20" height="4" rx="2"/><rect x="106" y="60" width="54" height="4" rx="2"/><rect x="170" y="60" width="24" height="4" rx="2"/><rect x="112" y="72" width="36" height="4" rx="2"/><rect x="176" y="72" width="18" height="4" rx="2"/></g>
         <rect x="106" y="88" width="88" height="5" rx="2" fill="var(--ink)"/>
       </svg>
-      <div class="body"><span class="num">06 · Personal</span><h3>Your tax receipt</h3>
-        <p>Enter your local taxes and fees; get a receipt of what they pay for, plus a day of the budget per resident.</p>
-        <span class="from">Like WDMMG “Daily Bread”, Civio, Gobierto · plain HTML</span></div>
+      <div class="body"><span class="num">06 · <span data-i18n="index.m_receipt_kind">Personal</span></span><h3 data-i18n="index.m_receipt_h3">Your tax receipt</h3>
+        <p data-i18n="index.m_receipt_desc">Enter your local taxes and fees; get a receipt of what they pay for, plus a day of the budget per resident.</p>
+        <span class="from" data-i18n="index.m_receipt_from">Like WDMMG “Daily Bread”, Civio, Gobierto · plain HTML</span></div>
     </a>
   </section>
 
   <section class="card">
-    <div class="card-head"><div><h2>What the best budget portals show</h2><p>Patterns that recur across live and archived open budget projects, and where each mockup covers them.</p></div></div>
+    <div class="card-head"><div><h2 data-i18n="index.patterns_h2">What the best budget portals show</h2><p data-i18n="index.patterns_sub">Patterns that recur across live and archived open budget projects, and where each mockup covers them.</p></div></div>
     <div class="patterns">
-      <div class="prow"><b>Flow from revenue to spending</b><span>Landing view of Open Budget Oakland and Sacramento, Civio, the USAspending Data Lab.</span><a href="flow.html">03 Money flow</a></div>
-      <div class="prow"><b>Drill-down composition</b><span>Treemap or bubble tree by function, economic type or department: OpenSpending Viewer, BubbleTree, Civio, USAspending Spending Explorer.</span><a href="treemap.html">02 Where money goes</a></div>
-      <div class="prow"><b>Change over time</b><span>Year comparison, stacked evolution, “compare years” pages in Civio and Open Budget Sacramento.</span><a href="overview.html">01 At a glance</a></div>
-      <div class="prow"><b>Budgeted vs executed</b><span>Execution rates by line in Civio and Gobierto; quarterly reports are rarely shown, which the Yerevan data allows.</span><a href="execution.html">04 Plan vs actual</a></div>
-      <div class="prow"><b>Territory</b><span>District or region maps in Civio, OpenSpending geo view, Open Budgets India dashboards.</span><a href="districts.html">05 Districts</a></div>
-      <div class="prow"><b>Personal tax receipt</b><span>Where Does My Money Go (“Daily Bread”), Civio <span class="mono">tax_receipt</span>, Gobierto “tu recibo”.</span><a href="receipt.html">06 Tax receipt</a></div>
-      <div class="prow"><b>Line items and search</b><span>Programme pages and searchable tables with downloads in Civio, BudgetKey, USAspending.</span><a href="treemap.html">02 programme table</a></div>
+      <div class="prow"><b data-i18n="index.pat_flow">Flow from revenue to spending</b><span data-i18n="index.pat_flow_desc">Landing view of Open Budget Oakland and Sacramento, Civio, the USAspending Data Lab.</span><a href="flow.html">03 <span data-i18n="nav.flow">Money flow</span></a></div>
+      <div class="prow"><b data-i18n="index.pat_drill">Drill-down composition</b><span data-i18n="index.pat_drill_desc">Treemap or bubble tree by function, economic type or department: OpenSpending Viewer, BubbleTree, Civio, USAspending Spending Explorer.</span><a href="treemap.html">02 <span data-i18n="nav.treemap">Where money goes</span></a></div>
+      <div class="prow"><b data-i18n="index.pat_time">Change over time</b><span data-i18n="index.pat_time_desc">Year comparison, stacked evolution, “compare years” pages in Civio and Open Budget Sacramento.</span><a href="overview.html">01 <span data-i18n="nav.overview">At a glance</span></a></div>
+      <div class="prow"><b data-i18n="index.pat_exec">Budgeted vs executed</b><span data-i18n="index.pat_exec_desc">Execution rates by line in Civio and Gobierto; quarterly reports are rarely shown, which the Yerevan data allows.</span><a href="execution.html">04 <span data-i18n="nav.execution">Plan vs actual</span></a></div>
+      <div class="prow"><b data-i18n="index.pat_territory">Territory</b><span data-i18n="index.pat_territory_desc">District or region maps in Civio, OpenSpending geo view, Open Budgets India dashboards.</span><a href="districts.html">05 <span data-i18n="nav.districts">Districts</span></a></div>
+      <div class="prow"><b data-i18n="index.pat_receipt">Personal tax receipt</b><span data-i18n-html="index.pat_receipt_desc">Where Does My Money Go (“Daily Bread”), Civio <span class="mono">tax_receipt</span>, Gobierto “tu recibo”.</span><a href="receipt.html">06 <span data-i18n="nav.receipt">Tax receipt</span></a></div>
+      <div class="prow"><b data-i18n="index.pat_items">Line items and search</b><span data-i18n="index.pat_items_desc">Programme pages and searchable tables with downloads in Civio, BudgetKey, USAspending.</span><a href="treemap.html">02 <span data-i18n="index.pat_items_link">programme table</span></a></div>
     </div>
   </section>
 
   <section class="card">
-    <div class="card-head"><div><h2>Open-source budget applications</h2><p>Status checked on GitHub on 7 November 2026 (archived flag, last commit, latest release).</p></div></div>
+    <div class="card-head"><div><h2 data-i18n="index.apps_h2">Open-source budget applications</h2><p data-i18n="index.apps_sub">Status checked on GitHub on 7 November 2026 (archived flag, last commit, latest release).</p></div></div>
     <div class="table-wrap tools-wrap"><table class="data">
-      <thead><tr><th>Project</th><th>Status</th><th>Licence</th><th>Stack</th><th>Budget views</th><th>Fit for Yerevan</th></tr></thead>
+      <thead><tr><th data-i18n="index.col_project">Project</th><th data-i18n="index.col_status">Status</th><th data-i18n="index.col_licence">Licence</th><th data-i18n="index.col_stack">Stack</th><th data-i18n="index.col_views">Budget views</th><th data-i18n="index.col_fit">Fit for Yerevan</th></tr></thead>
       <tbody>
-        <tr><td><a href="https://github.com/civio/presupuesto">Civio Presupuesto</a></td><td><span class="pill good">Active · v5.2, Oct 2026</span></td><td>EUPL-1.1</td><td>Django, Postgres, D3</td><td>treemap, flow, evolution, budgeted vs executed, tax receipt, map, programme pages, search</td><td>Best UX reference. Needs a server and a remap of the Spanish classification; has English locale.</td></tr>
-        <tr><td><a href="https://github.com/opensacorg/openbudgetsac.org">Open Budget Sacramento</a></td><td><span class="pill good">Active · May 2026</span></td><td>MIT</td><td>Eleventy 3, React 19, TypeScript</td><td>flow, treemap drill-down, year compare, i18n</td><td>Closest static template to fork; CSV input.</td></tr>
-        <tr><td><a href="https://github.com/PopulateTools/gobierto">Gobierto</a></td><td><span class="pill good">Active · Nov 2026</span></td><td>AGPL-3.0</td><td>Rails, Postgres, Redis</td><td>overview, execution, peer comparison, invoices, tax receipt, indicators</td><td>Full e-government suite; too heavy, use for ideas.</td></tr>
-        <tr><td><a href="https://github.com/fedspendingtransparency/usaspending-website">USAspending website</a></td><td><span class="pill good">Active · Oct 2026</span></td><td>CC0</td><td>React + separate API</td><td>Spending Explorer treemap, Data Lab Sankey</td><td>Pattern reference only (US federal scale).</td></tr>
-        <tr><td><a href="https://github.com/OpenBudget/budgetkey-app">BudgetKey (Israel)</a></td><td><span class="pill good">Active · Oct 2026</span></td><td>MIT (API)</td><td>Angular, Python pipelines</td><td>item pages, search, charts</td><td>Hebrew-only and Israel-specific.</td></tr>
-        <tr><td><a href="https://github.com/openoakland/openbudgetoakland">Open Budget Oakland</a></td><td><span class="pill warning">Stale · 2022</span></td><td>MIT</td><td>Eleventy, D3</td><td>flow, treemap, compare</td><td>Superseded by the Sacramento fork.</td></tr>
-        <tr><td><a href="https://github.com/cbgaindia">Open Budgets India</a></td><td><span class="pill warning">Fading · 2023–25</span></td><td>MIT</td><td>CKAN, Next.js</td><td>catalogue, district dashboards</td><td>No.</td></tr>
-        <tr><td><a href="https://github.com/openspending/os-viewer">OpenSpending Viewer + Babbage</a></td><td><span class="pill critical">Dead · 2019–20</span></td><td>MIT</td><td>AngularJS, Python OLAP</td><td>treemap, bubble tree, Sankey, pivot, map</td><td>No; openspending.org is now a dataset catalogue.</td></tr>
-        <tr><td><a href="https://github.com/openbudgets/platform">OpenBudgets.eu</a></td><td><span class="pill critical">Dead · 2017</span></td><td>GPL-3.0</td><td>OpenSpending fork</td><td>as OpenSpending</td><td>No.</td></tr>
-        <tr><td>BubbleTree, Where Does My Money Go</td><td><span class="pill critical">Dead · 2017–18</span></td><td>MIT-style</td><td>jQuery, Raphaël</td><td>bubble tree, “Daily Bread” calculator</td><td>Ideas only.</td></tr>
-        <tr><td>Fiscal Data Package</td><td><span class="pill critical">Frozen · 2016</span></td><td>n/a</td><td>JSON spec</td><td>n/a</td><td>At most an optional export format.</td></tr>
+        <tr><td><a href="https://github.com/civio/presupuesto">Civio Presupuesto</a></td><td><span class="pill good" data-i18n="index.civio_status">Active · v5.2, Oct 2026</span></td><td>EUPL-1.1</td><td>Django, Postgres, D3</td><td data-i18n="index.civio_views">treemap, flow, evolution, budgeted vs executed, tax receipt, map, programme pages, search</td><td data-i18n="index.civio_fit">Best UX reference. Needs a server and a remap of the Spanish classification; has English locale.</td></tr>
+        <tr><td><a href="https://github.com/opensacorg/openbudgetsac.org">Open Budget Sacramento</a></td><td><span class="pill good" data-i18n="index.sac_status">Active · May 2026</span></td><td>MIT</td><td>Eleventy 3, React 19, TypeScript</td><td data-i18n="index.sac_views">flow, treemap drill-down, year compare, i18n</td><td data-i18n="index.sac_fit">Closest static template to fork; CSV input.</td></tr>
+        <tr><td><a href="https://github.com/PopulateTools/gobierto">Gobierto</a></td><td><span class="pill good" data-i18n="index.gobierto_status">Active · Nov 2026</span></td><td>AGPL-3.0</td><td>Rails, Postgres, Redis</td><td data-i18n="index.gobierto_views">overview, execution, peer comparison, invoices, tax receipt, indicators</td><td data-i18n="index.gobierto_fit">Full e-government suite; too heavy, use for ideas.</td></tr>
+        <tr><td><a href="https://github.com/fedspendingtransparency/usaspending-website" data-i18n="index.usa_name">USAspending website</a></td><td><span class="pill good" data-i18n="index.st_active_oct">Active · Oct 2026</span></td><td>CC0</td><td data-i18n="index.usa_stack">React + separate API</td><td data-i18n="index.usa_views">Spending Explorer treemap, Data Lab Sankey</td><td data-i18n="index.usa_fit">Pattern reference only (US federal scale).</td></tr>
+        <tr><td><a href="https://github.com/OpenBudget/budgetkey-app" data-i18n="index.budgetkey_name">BudgetKey (Israel)</a></td><td><span class="pill good" data-i18n="index.st_active_oct">Active · Oct 2026</span></td><td>MIT (API)</td><td data-i18n="index.budgetkey_stack">Angular, Python pipelines</td><td data-i18n="index.budgetkey_views">item pages, search, charts</td><td data-i18n="index.budgetkey_fit">Hebrew-only and Israel-specific.</td></tr>
+        <tr><td><a href="https://github.com/openoakland/openbudgetoakland">Open Budget Oakland</a></td><td><span class="pill warning" data-i18n="index.oakland_status">Stale · 2022</span></td><td>MIT</td><td>Eleventy, D3</td><td data-i18n="index.oakland_views">flow, treemap, compare</td><td data-i18n="index.oakland_fit">Superseded by the Sacramento fork.</td></tr>
+        <tr><td><a href="https://github.com/cbgaindia">Open Budgets India</a></td><td><span class="pill warning" data-i18n="index.india_status">Fading · 2023–25</span></td><td>MIT</td><td>CKAN, Next.js</td><td data-i18n="index.india_views">catalogue, district dashboards</td><td data-i18n="index.fit_no">No.</td></tr>
+        <tr><td><a href="https://github.com/openspending/os-viewer">OpenSpending Viewer + Babbage</a></td><td><span class="pill critical" data-i18n="index.os_status">Dead · 2019–20</span></td><td>MIT</td><td>AngularJS, Python OLAP</td><td data-i18n="index.os_views">treemap, bubble tree, Sankey, pivot, map</td><td data-i18n="index.os_fit">No; openspending.org is now a dataset catalogue.</td></tr>
+        <tr><td><a href="https://github.com/openbudgets/platform">OpenBudgets.eu</a></td><td><span class="pill critical" data-i18n="index.obeu_status">Dead · 2017</span></td><td>GPL-3.0</td><td data-i18n="index.obeu_stack">OpenSpending fork</td><td data-i18n="index.obeu_views">as OpenSpending</td><td data-i18n="index.fit_no">No.</td></tr>
+        <tr><td>BubbleTree, Where Does My Money Go</td><td><span class="pill critical" data-i18n="index.bubbletree_status">Dead · 2017–18</span></td><td data-i18n="index.bubbletree_licence">MIT-style</td><td>jQuery, Raphaël</td><td data-i18n="index.bubbletree_views">bubble tree, “Daily Bread” calculator</td><td data-i18n="index.bubbletree_fit">Ideas only.</td></tr>
+        <tr><td>Fiscal Data Package</td><td><span class="pill critical" data-i18n="index.fdp_status">Frozen · 2016</span></td><td data-i18n="fmt.na">n/a</td><td data-i18n="index.fdp_stack">JSON spec</td><td data-i18n="fmt.na">n/a</td><td data-i18n="index.fdp_fit">At most an optional export format.</td></tr>
       </tbody>
     </table></div>
   </section>
 
   <section class="card">
-    <div class="card-head"><div><h2>General-purpose open tools</h2><p>Libraries and frameworks used to build budget views. Status as of November 2026.</p></div></div>
+    <div class="card-head"><div><h2 data-i18n="index.tools_h2">General-purpose open tools</h2><p data-i18n="index.tools_sub">Libraries and frameworks used to build budget views. Status as of November 2026.</p></div></div>
     <div class="table-wrap tools-wrap"><table class="data">
-      <thead><tr><th>Tool</th><th>Status</th><th>Licence</th><th>Budget-relevant views</th><th>Fit for Yerevan</th></tr></thead>
+      <thead><tr><th data-i18n="index.col_tool">Tool</th><th data-i18n="index.col_status">Status</th><th data-i18n="index.col_licence">Licence</th><th data-i18n="index.col_tool_views">Budget-relevant views</th><th data-i18n="index.col_fit">Fit for Yerevan</th></tr></thead>
       <tbody>
-        <tr><td><a href="https://echarts.apache.org">Apache ECharts</a></td><td><span class="pill good">Active · 6.1, May 2026</span></td><td>Apache-2.0</td><td>treemap with drill-down, sunburst, Sankey, heatmap, map, bar/line</td><td>Strong: one library covers every pattern (used in these mockups).</td></tr>
-        <tr><td><a href="https://observablehq.com/framework/">Observable Framework</a></td><td><span class="pill good">Stable · v1.13, Mar 2026</span></td><td>ISC</td><td>any JS chart; data loaders in Python/SQL; DuckDB-WASM</td><td>Strong: static site built straight from DuckDB.</td></tr>
-        <tr><td><a href="https://evidence.dev">Evidence</a></td><td><span class="pill good">Active · rewritten 2026</span></td><td>MIT</td><td>treemap, Sankey, choropleth, pivot, bar/line in SQL + Markdown</td><td>Strong, static output; watch churn after the rewrite. Direct <span class="mono">.duckdb</span> source unverified.</td></tr>
-        <tr><td><a href="https://d3js.org">D3</a></td><td><span class="pill good">Active · 7.9</span></td><td>ISC</td><td>anything; treemap via d3-hierarchy</td><td>Most control, most effort; d3-sankey has had no release since 2019.</td></tr>
-        <tr><td>Vega-Lite, Observable Plot</td><td><span class="pill good">Active</span></td><td>BSD-3, ISC</td><td>bar, line, area, maps; no native treemap or Sankey</td><td>Supporting charts only.</td></tr>
-        <tr><td>Mosaic + DuckDB-WASM</td><td><span class="pill good">Active</span></td><td>BSD-3, MIT</td><td>linked cross-filter charts over DuckDB in the browser</td><td>Optional “explore the data” page.</td></tr>
-        <tr><td>Apache Superset, Metabase, Rill</td><td><span class="pill good">Active</span></td><td>Apache-2.0, AGPL, Apache-2.0</td><td>treemap, sunburst, Sankey, pivot, maps</td><td>Need a server; good for internal QA, not a citizen site.</td></tr>
-        <tr><td>Datasette</td><td><span class="pill good">Active · 0.65</span></td><td>Apache-2.0</td><td>tables, facets, plugin charts</td><td>SQLite-first; DuckDB only through an old Parquet plugin.</td></tr>
-        <tr><td>SankeyMATIC, RAWGraphs</td><td><span class="pill good">Active</span></td><td>ISC, Apache-2.0</td><td>Sankey; treemap, sunburst, alluvial (SVG export)</td><td>One-off graphics for reports and press, not a portal.</td></tr>
+        <tr><td><a href="https://echarts.apache.org">Apache ECharts</a></td><td><span class="pill good" data-i18n="index.echarts_status">Active · 6.1, May 2026</span></td><td>Apache-2.0</td><td data-i18n="index.echarts_views">treemap with drill-down, sunburst, Sankey, heatmap, map, bar/line</td><td data-i18n="index.echarts_fit">Strong: one library covers every pattern (used in these mockups).</td></tr>
+        <tr><td><a href="https://observablehq.com/framework/">Observable Framework</a></td><td><span class="pill good" data-i18n="index.ojs_status">Stable · v1.13, Mar 2026</span></td><td>ISC</td><td data-i18n="index.ojs_views">any JS chart; data loaders in Python/SQL; DuckDB-WASM</td><td data-i18n="index.ojs_fit">Strong: static site built straight from DuckDB.</td></tr>
+        <tr><td><a href="https://evidence.dev">Evidence</a></td><td><span class="pill good" data-i18n="index.evidence_status">Active · rewritten 2026</span></td><td>MIT</td><td data-i18n="index.evidence_views">treemap, Sankey, choropleth, pivot, bar/line in SQL + Markdown</td><td data-i18n-html="index.evidence_fit">Strong, static output; watch churn after the rewrite. Direct <span class="mono">.duckdb</span> source unverified.</td></tr>
+        <tr><td><a href="https://d3js.org">D3</a></td><td><span class="pill good" data-i18n="index.d3_status">Active · 7.9</span></td><td>ISC</td><td data-i18n="index.d3_views">anything; treemap via d3-hierarchy</td><td data-i18n="index.d3_fit">Most control, most effort; d3-sankey has had no release since 2019.</td></tr>
+        <tr><td>Vega-Lite, Observable Plot</td><td><span class="pill good" data-i18n="index.st_active">Active</span></td><td>BSD-3, ISC</td><td data-i18n="index.vega_views">bar, line, area, maps; no native treemap or Sankey</td><td data-i18n="index.vega_fit">Supporting charts only.</td></tr>
+        <tr><td>Mosaic + DuckDB-WASM</td><td><span class="pill good" data-i18n="index.st_active">Active</span></td><td>BSD-3, MIT</td><td data-i18n="index.mosaic_views">linked cross-filter charts over DuckDB in the browser</td><td data-i18n="index.mosaic_fit">Optional “explore the data” page.</td></tr>
+        <tr><td>Apache Superset, Metabase, Rill</td><td><span class="pill good" data-i18n="index.st_active">Active</span></td><td>Apache-2.0, AGPL, Apache-2.0</td><td data-i18n="index.bi_views">treemap, sunburst, Sankey, pivot, maps</td><td data-i18n="index.bi_fit">Need a server; good for internal QA, not a citizen site.</td></tr>
+        <tr><td>Datasette</td><td><span class="pill good" data-i18n="index.datasette_status">Active · 0.65</span></td><td>Apache-2.0</td><td data-i18n="index.datasette_views">tables, facets, plugin charts</td><td data-i18n="index.datasette_fit">SQLite-first; DuckDB only through an old Parquet plugin.</td></tr>
+        <tr><td>SankeyMATIC, RAWGraphs</td><td><span class="pill good" data-i18n="index.st_active">Active</span></td><td>ISC, Apache-2.0</td><td data-i18n="index.sankeymatic_views">Sankey; treemap, sunburst, alluvial (SVG export)</td><td data-i18n="index.sankeymatic_fit">One-off graphics for reports and press, not a portal.</td></tr>
       </tbody>
     </table></div>
   </section>
 
   <section class="card">
-    <div class="card-head"><div><h2>Options for a production site</h2><p>All three reuse the same DuckDB database and English / Russian / Armenian dictionaries.</p></div></div>
+    <div class="card-head"><div><h2 data-i18n="index.recs_h2">Options for a production site</h2><p data-i18n="index.recs_sub">All three reuse the same DuckDB database and its dictionaries of names in nine languages.</p></div></div>
     <div class="recs">
-      <div class="rec pick"><span class="tag">Recommended</span><h3>Static site: DuckDB → JSON → ECharts</h3>
-        <ul><li>What these mockups already are: one export script, plain pages, GitHub Pages hosting.</li>
-          <li>No server, no database to run; rebuild with each data release.</li>
-          <li>Next step: move the pages into Observable Framework for routing and data loaders if the site grows past ~10 pages.</li></ul></div>
-      <div class="rec"><span class="tag">Alternative</span><h3>Evidence or Observable Framework</h3>
-        <ul><li>Pages written in Markdown + SQL against the database at build time.</li>
-          <li>Fast to add new tables and charts; Evidence ships treemap and Sankey components.</li>
-          <li>Less control over bespoke views such as the tax receipt.</li></ul></div>
-      <div class="rec"><span class="tag">Heavier</span><h3>Fork Civio Presupuesto or Open Budget Sacramento</h3>
-        <ul><li>Mature citizen UX: search, programme pages, receipt, comparisons.</li>
-          <li>Requires remapping the Armenian functional and economic classifications.</li>
-          <li>Civio needs Django + Postgres hosting; Sacramento is static but has fewer views.</li></ul></div>
+      <div class="rec pick"><span class="tag" data-i18n="index.rec1_tag">Recommended</span><h3 data-i18n="index.rec1_h3">Static site: DuckDB → JSON → ECharts</h3>
+        <ul><li data-i18n="index.rec1_li1">What these mockups already are: one export script, plain pages, GitHub Pages hosting.</li>
+          <li data-i18n="index.rec1_li2">No server, no database to run; rebuild with each data release.</li>
+          <li data-i18n="index.rec1_li3">Next step: move the pages into Observable Framework for routing and data loaders if the site grows past ~10 pages.</li></ul></div>
+      <div class="rec"><span class="tag" data-i18n="index.rec2_tag">Alternative</span><h3 data-i18n="index.rec2_h3">Evidence or Observable Framework</h3>
+        <ul><li data-i18n="index.rec2_li1">Pages written in Markdown + SQL against the database at build time.</li>
+          <li data-i18n="index.rec2_li2">Fast to add new tables and charts; Evidence ships treemap and Sankey components.</li>
+          <li data-i18n="index.rec2_li3">Less control over bespoke views such as the tax receipt.</li></ul></div>
+      <div class="rec"><span class="tag" data-i18n="index.rec3_tag">Heavier</span><h3 data-i18n="index.rec3_h3">Fork Civio Presupuesto or Open Budget Sacramento</h3>
+        <ul><li data-i18n="index.rec3_li1">Mature citizen UX: search, programme pages, receipt, comparisons.</li>
+          <li data-i18n="index.rec3_li2">Requires remapping the Armenian functional and economic classifications.</li>
+          <li data-i18n="index.rec3_li3">Civio needs Django + Postgres hosting; Sacramento is static but has fewer views.</li></ul></div>
     </div>
   </section>
 
   <section class="card">
-    <h2>About the data in the mockups</h2>
+    <h2 data-i18n="index.about_h2">About the data in the mockups</h2>
     <div class="prose">
-      <p>Amounts come from the Council's budget decisions (approved budget, appendices 1–7) and the form Հ-9 execution reports (approved plan, revised plan and actual, cumulative by quarter). They are nominal AMD; the database stores thousand AMD, the mockups show million and billion.</p>
-      <p>The budget books land and property sales as negative spending under “Economic affairs n.e.c.”. Composition views show gross allocations; totals and trends use net figures as published. Internal transfers between the administrative and fund parts of the budget are left out.</p>
-      <p>Regenerate the data with <span class="mono">python viz/export_data.py --db data/yerevan_budget.duckdb</span>.</p>
+      <p data-i18n="index.about_p1">Amounts come from the Council's budget decisions (approved budget, appendices 1–7) and the form Հ-9 execution reports (approved plan, revised plan and actual, cumulative by quarter). They are nominal AMD; the database stores thousand AMD, the mockups show million and billion.</p>
+      <p data-i18n="index.about_p2">The budget books land and property sales as negative spending under “Economic affairs n.e.c.”. Composition views show gross allocations; totals and trends use net figures as published. Internal transfers between the administrative and fund parts of the budget are left out.</p>
+      <p data-i18n-html="index.about_p3">Regenerate the data with <span class="mono">python viz/export_data.py --db data/yerevan_budget.duckdb</span>.</p>
     </div>
   </section>
 </main>
 
 <script src="data.js"></script>
 <script src="assets/common.js"></script>
-<script>YB.header("index.html");</script>
+<script>YB.ready("index", function () { YB.header("index.html"); });</script>
 </body>
 </html>

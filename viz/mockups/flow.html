@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Yerevan Budget Money Flow</title>
+<title data-i18n="flow.title">Yerevan Budget Money Flow</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&family=Noto+Sans:wght@400;500;600;700;800&family=Noto+Sans+Armenian:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/style.css">
 <style>
-  .flow-scroll { overflow-x: auto; margin: 0 -4px; }
+  .flow-scroll { overflow-x: auto; margin: 0 -4px; direction: ltr; }  /* the diagram and its column heads stay left-to-right */
   .flow-scroll .chart { min-width: 860px; height: 660px; }
   .balance { display: flex; flex-wrap: wrap; gap: 8px 28px; align-items: baseline; }
   .balance div { display: grid; }
@@ -21,30 +21,30 @@
 <body>
 <main class="page">
   <div class="page-head">
-    <h1>From revenue to spending</h1>
-    <p class="lede">Follow the money: where the city budget comes from, and which functions and services it pays for. Band widths are proportional to amounts.</p>
+    <h1 data-i18n="flow.h1">From revenue to spending</h1>
+    <p class="lede" data-i18n="flow.lede">Follow the money: where the city budget comes from, and which functions and services it pays for. Band widths are proportional to amounts.</p>
     <div class="pattern">
-      <span><b>Pattern:</b> flow (Sankey) landing view, as in Open Budget Oakland / Sacramento, Civio Presupuesto and the USAspending Data Lab</span>
+      <span data-i18n-html="flow.pattern"><b>Pattern:</b> flow (Sankey) landing view, as in Open Budget Oakland / Sacramento, Civio Presupuesto and the USAspending Data Lab</span>
       <span class="chip">ECharts sankey</span>
     </div>
   </div>
 
   <div class="filters">
-    <div class="filter"><span>Year</span><span id="f-year"></span></div>
+    <div class="filter"><span data-i18n="flow.f_year">Year</span><span id="f-year"></span></div>
   </div>
 
   <section class="card">
     <div class="card-head">
       <div class="balance" id="balance"></div>
-      <button class="toggle-table" type="button" id="t-btn" aria-expanded="false">Show table</button>
+      <button class="toggle-table" type="button" id="t-btn" aria-expanded="false" data-i18n="ui.show_table">Show table</button>
     </div>
     <div class="flow-scroll">
-      <div class="cols" aria-hidden="true"><span>Sources</span><span>Budget</span><span>Functions</span><span>Main services</span></div>
-      <div class="chart" id="c-flow" role="img" aria-label="Sankey diagram from revenue sources through the city budget to functions and services"></div>
+      <div class="cols" aria-hidden="true"><span data-i18n="flow.col_sources">Sources</span><span data-i18n="flow.col_budget">Budget</span><span data-i18n="flow.col_functions">Functions</span><span data-i18n="flow.col_services">Main services</span></div>
+      <div class="chart" id="c-flow" role="img" aria-label="Sankey diagram from revenue sources through the city budget to functions and services" data-i18n-attr="aria-label:flow.chart_aria"></div>
     </div>
     <div class="table-wrap" id="tbl" hidden></div>
     <p class="note" id="note"></p>
-    <p class="note"><b>Other functions</b> joins health, defence, public order and reserve funds.</p>
+    <p class="note" data-i18n-html="flow.other_note"><b>Other functions</b> joins health, defence, public order and reserve funds.</p>
   </section>
 </main>
 
@@ -52,19 +52,18 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <script src="assets/common.js"></script>
 <script>
-(function () {
-  const { B, css, el, amd, short, pct, esc, base, chart, seg, table, tableToggle, sectionColor, sectionName } = YB;
+YB.ready("flow", function () {
+  const { B, css, el, t, amd, short, pct, esc, base, chart, seg, table, tableToggle, sectionColor, sectionName } = YB;
   YB.header("flow.html");
 
   let year = "2025";
   const BREAK_DOWN = ["04", "09", "05", "01"];   // sections split into sub-functions
   const MIN_CLASS = 1500;                        // million AMD: smaller sub-functions fold into "other"
   const MAIN = ["04", "09", "01", "05", "06", "08", "10"]; // the rest fold into "Other functions"
-  const SHORT = {
-    "01.1.1": "Executive bodies and administration", "04.1.1": "General economic affairs",
-    "04.5.5": "Metro, lifts and other transport", "04.9.1": "Economic affairs n.e.c.",
-    "05.6.1": "Environmental protection n.e.c.", "09.6.1": "Support services to education",
-    "06.6.1": "Housing and amenities n.e.c.",
+  // short names of some sub-functions: keys flow.short_<code with _>, else the name of the classification
+  const shortName = (code) => {
+    const key = `flow.short_${code.replace(/\./g, "_")}`;
+    return YB.has(key) ? t(key) : (B.class_names[code] || code);
   };
 
   function model(y) {
@@ -95,54 +94,60 @@
     const m = model(year);
     const nodes = [], links = [];
     const muted = css("--muted"), ink2 = css("--ink-2"), surface = css("--surface");
-    const hub = `City budget ${year}`;
+    // nodes are identified by ids built from keys and codes (translated names may coincide); name = label
+    const hub = "hub";
     const srcColor = ink2;
-    const add = (name, color, depth, extra) => nodes.push(Object.assign({ name, depth, itemStyle: { color, borderWidth: 0 } }, extra || {}));
+    const names = {};
+    const add = (id, name, color, depth, extra) => {
+      names[id] = name;
+      nodes.push(Object.assign({ id, name, depth, itemStyle: { color, borderWidth: 0 } }, extra || {}));
+    };
 
     for (const g of m.rev.groups.filter((g) => g.value > 0)) {
-      add(g.label, srcColor, 0);
-      links.push({ source: g.label, target: hub, value: g.value, lineStyle: { color: muted, opacity: 0.22 } });
+      add(`rev:${g.key}`, g.label, srcColor, 0);
+      links.push({ source: `rev:${g.key}`, target: hub, value: g.value, lineStyle: { color: muted, opacity: 0.22 } });
     }
     if (m.asset > 0) {
-      add("Sale of land and property", srcColor, 0);
-      links.push({ source: "Sale of land and property", target: hub, value: m.asset, lineStyle: { color: muted, opacity: 0.22 } });
+      add("asset_sales", t("flow.asset_sales"), srcColor, 0);
+      links.push({ source: "asset_sales", target: hub, value: m.asset, lineStyle: { color: muted, opacity: 0.22 } });
     }
     if (m.balance < 0) {
-      add("Deficit financing", css("--s-other"), 0);
-      links.push({ source: "Deficit financing", target: hub, value: -m.balance, lineStyle: { color: muted, opacity: 0.22 } });
+      add("deficit", t("flow.deficit_financing"), css("--s-other"), 0);
+      links.push({ source: "deficit", target: hub, value: -m.balance, lineStyle: { color: muted, opacity: 0.22 } });
     }
-    add(hub, css("--ink"), 1, { label: { position: "inside", show: false } });
+    add(hub, t("flow.hub", { year }), css("--ink"), 1, { label: { position: "inside", show: false } });
 
     const order = MAIN.filter((c) => (m.secs[c] || 0) > 0.5);
     for (const code of order) {
-      const name = sectionName(code), col = sectionColor(code), v = m.secs[code];
-      add(name, col, 2);
-      links.push({ source: hub, target: name, value: v, lineStyle: { color: col, opacity: 0.3 } });
+      const sid = `sec:${code}`, name = sectionName(code), col = sectionColor(code), v = m.secs[code];
+      add(sid, name, col, 2);
+      links.push({ source: hub, target: sid, value: v, lineStyle: { color: col, opacity: 0.3 } });
       if (!BREAK_DOWN.includes(code)) continue;
       const kids = Object.entries(m.classes).filter(([c, val]) => c.startsWith(code + ".") && val > 0)
         .sort((a, b) => b[1] - a[1]);
       let rest = v;
       for (const [c, val] of kids) {
         if (val < MIN_CLASS) continue;
-        const cname = SHORT[c] || B.class_names[c] || c;
-        add(cname, col, 3);
-        links.push({ source: name, target: cname, value: val, lineStyle: { color: col, opacity: 0.22 } });
+        add(`cls:${c}`, shortName(c), col, 3);
+        links.push({ source: sid, target: `cls:${c}`, value: val, lineStyle: { color: col, opacity: 0.22 } });
         rest -= val;
       }
       if (rest > 300) {
-        const oname = `Other ${name.toLowerCase()}`;
-        add(oname, col, 3, { itemStyle: { color: col, opacity: 0.55, borderWidth: 0 } });
-        links.push({ source: name, target: oname, value: rest, lineStyle: { color: col, opacity: 0.14 } });
+        const oid = `rest:${code}`;
+        // lname: the name in lower case, inside a phrase (German keeps the capital of its nouns)
+        add(oid, t("flow.other_in_section", { name, lname: YB.lang === "de" ? name : name.toLocaleLowerCase(YB.lang) }), col, 3,
+          { itemStyle: { color: col, opacity: 0.55, borderWidth: 0 } });
+        links.push({ source: sid, target: oid, value: rest, lineStyle: { color: col, opacity: 0.14 } });
       }
     }
     const other = Object.entries(m.secs).filter(([c]) => !MAIN.includes(c)).reduce((a, [, v]) => a + v, 0);
     if (other > 0.5) {
-      add("Other functions", css("--s-other"), 2);
-      links.push({ source: hub, target: "Other functions", value: other, lineStyle: { color: muted, opacity: 0.2 } });
+      add("other", t("flow.other_functions"), css("--s-other"), 2);
+      links.push({ source: hub, target: "other", value: other, lineStyle: { color: muted, opacity: 0.2 } });
     }
     if (m.balance > 0) {
-      add("Unspent (surplus)", css("--s-other"), 2);
-      links.push({ source: hub, target: "Unspent (surplus)", value: m.balance, lineStyle: { color: muted, opacity: 0.2 } });
+      add("surplus", t("flow.unspent"), css("--s-other"), 2);
+      links.push({ source: hub, target: "surplus", value: m.balance, lineStyle: { color: muted, opacity: 0.2 } });
     }
     const total = m.rev.total + m.asset + Math.max(0, -m.balance);
 
@@ -151,8 +156,8 @@
       trigger: "item",
       formatter: (p) => {
         if (p.dataType === "edge") {
-          return `<div style="color:${css("--muted")};font-size:11.5px">${esc(p.data.source)} → ${esc(p.data.target)}</div>` +
-            `<b style="font-size:15px">${esc(amd(p.value))}</b> <span style="color:${css("--ink-2")}">· ${pct(p.value / total, 1)} of all money</span>`;
+          return `<div style="color:${css("--muted")};font-size:11.5px">${esc(t("flow.tip_edge", { from: names[p.data.source], to: names[p.data.target] }))}</div>` +
+            `<b style="font-size:15px">${esc(amd(p.value))}</b> <span style="color:${css("--ink-2")}">· ${esc(t("flow.tip_share", { pct: pct(p.value / total, 1) }))}</span>`;
         }
         return `<div style="font-weight:650">${esc(p.name)}</div><b style="font-size:15px">${esc(amd(p.value))}</b>` +
           ` <span style="color:${css("--ink-2")}">· ${pct(p.value / total, 1)}</span>`;
@@ -170,39 +175,41 @@
       },
       lineStyle: { curveness: 0.5 },
     }];
-    return { o, m, nodes, links };
+    return { o, m, nodes, links, names };
   }
 
   const flow = chart(document.getElementById("c-flow"), () => option().o);
 
   function render() {
     flow.render();
-    const { m, links } = option();
+    const { m, links, names } = option();
     const bal = document.getElementById("balance");
-    const label = m.kind === "actual" ? "actual" : "approved budget";
+    const actual = m.kind === "actual";
     bal.replaceChildren(
-      el("div", null, [el("span", { text: `Revenue, ${label}` }), el("b", { text: amd(m.rev.total) })]),
-      el("div", null, [el("span", { text: `Spending, ${label}` }), el("b", { text: amd(m.netSpend) })]),
-      el("div", null, [el("span", { text: m.balance >= 0 ? "Surplus" : "Deficit" }), el("b", { text: amd(Math.abs(m.balance)) })]),
+      el("div", null, [el("span", { text: t(actual ? "flow.revenue_actual" : "flow.revenue_approved") }), el("b", { text: amd(m.rev.total) })]),
+      el("div", null, [el("span", { text: t(actual ? "flow.spending_actual" : "flow.spending_approved") }), el("b", { text: amd(m.netSpend) })]),
+      el("div", null, [el("span", { text: t(m.balance >= 0 ? "flow.surplus" : "flow.deficit") }), el("b", { text: amd(Math.abs(m.balance)) })]),
     );
-    const note = document.getElementById("note");
-    note.replaceChildren(el("b", { text: "How to read: " }),
-      `${m.kind === "actual" ? "Annual execution report" : "Budget decision of the Council"} for ${year}. ` +
-      `Land and property sales (${amd(m.asset)}) appear in the source documents as negative spending; here they are shown as a source, ` +
-      `so “Economic affairs” is gross. “State funds for delegated powers” pay for tasks the state hands to the city, such as the metro and schools.`);
+    // HTML string: the values are a translated sentence and an amount formatted here, escaped
+    document.getElementById("note").innerHTML = t("flow.read_note", {
+      source: esc(t(actual ? "flow.source_report" : "flow.source_decision", { year })),
+      asset: esc(amd(m.asset)),
+    });
     const tbl = document.getElementById("tbl");
     if (!tbl.hidden) fillTable();
     function fillTable() {
-      table(tbl, [{ key: "source", label: "From" }, { key: "target", label: "To" }, { key: "value", label: "AMD", num: true, fmt: short }], links);
+      table(tbl, [{ key: "source", label: t("flow.col_from") }, { key: "target", label: t("flow.col_to") }, { key: "value", label: t("flow.col_amd"), num: true, fmt: short }],
+        links.map((l) => ({ source: names[l.source], target: names[l.target], value: l.value })));
     }
     tblFill = fillTable;
   }
   let tblFill = () => {};
   tableToggle(document.getElementById("t-btn"), document.getElementById("tbl"), () => tblFill());
 
-  seg(document.getElementById("f-year"), [["2024", "2024 actual"], ["2025", "2025 actual"], ["2026", "2026 approved"]], year, (v) => { year = v; render(); }, "Year");
+  seg(document.getElementById("f-year"), [["2024", t("flow.year_actual", { year: 2024 })], ["2025", t("flow.year_actual", { year: 2025 })],
+    ["2026", t("flow.year_approved", { year: 2026 })]], year, (v) => { year = v; render(); }, t("flow.f_year"));
   render();
-})();
+});
 </script>
 </body>
 </html>
