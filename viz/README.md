@@ -4,6 +4,9 @@ Interactive mockups of ways to present the Yerevan city budget, built on the dat
 (labels in English). Open `mockups/index.html`: it links the six mockups and reviews the open-source tools
 for budget visualization.
 
+Live: <https://opendataam.github.io/arm-yerevan-budget/> (published by `.github/workflows/pages.yml` on every
+push to `main` that changes `viz/mockups`).
+
 | page | pattern |
 |---|---|
 | `overview.html` | headline figures, revenue and spending 2017–2026 (approved / revised / actual), spending by function and economic type |
