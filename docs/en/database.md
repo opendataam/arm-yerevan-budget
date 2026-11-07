@@ -16,9 +16,10 @@
 * **One long fact table** for all the standard forms (`fact_budget_line`): a row per table row × amount column,
   with the meaning of the column in explicit attributes (`scenario`, `value_year`, `value_period`, `budget_part`).
   Wide views (`v_execution`, `v_budget_approved`, …) pivot it for everyday use.
-* **Codes in facts, names in three languages.** The Armenian name of every row is kept as printed (`label_hy`,
-  without the formulas); English and Russian names come from the dictionaries (`dim_label`, `dim_translation`),
-  with a fallback to the name of the row's code (`dim_functional`, `dim_economic`, `dim_line`).
+* **Codes in facts, names in nine languages.** The Armenian name of every row is kept as printed (`label_hy`,
+  without the formulas); its English, Russian, French, Spanish, Portuguese, German, Arabic and Persian names
+  (`label_en` … `label_fa`) come from the dictionaries (`dim_label`, `dim_translation`), with a fallback to the
+  name of the row's code (`dim_functional`, `dim_economic`, `dim_line`). See [translations.md](translations.md).
 * **Provenance on every row:** `doc_id`, `file_id`, `page`, `seq` lead back to the document, the file in the archive,
   the page and the row.
 * **Primary documents.** Several documents can cover the same type / year / period (the same file under two URLs,
@@ -60,9 +61,9 @@ erDiagram
 | table | contents |
 |---|---|
 | `meta_page` | crawled pages of the Finance section |
-| `meta_document` | every document (core and institutional): URL, title in hy / en / ru, type, year, period, size, hash, primary flag |
+| `meta_document` | every document (core and institutional): URL, title in hy and its translations (`title_<lang>`), type, year, period, size, hash, primary flag |
 | `meta_file` | files of the core documents and members of their archives: format, pages, legacy-font conversions, parsing statistics |
-| `dim_doc_type`, `dim_period`, `dim_statement`, `dim_scenario`, `dim_budget_part` | reference lists with names in en / ru / hy |
+| `dim_doc_type`, `dim_period`, `dim_statement`, `dim_scenario`, `dim_budget_part` | reference lists with names in hy and every translation language |
 | `dim_district` | the Municipality and the 12 administrative districts of Yerevan |
 | `dim_functional` | functional classification codes `SS.G.C` with names |
 | `dim_economic` | article codes (economic classification, revenue and financing articles) with names |
@@ -99,14 +100,14 @@ Totals and subtotals are rows of the forms like any other: to sum amounts, selec
 
 | view | contents |
 |---|---|
-| `v_budget_line` | `fact_budget_line` of the primary documents with names in en / ru |
+| `v_budget_line` | `fact_budget_line` of the primary documents with names in every language (`label_<lang>`, `program_<lang>`) |
 | `v_execution`, `v_execution_annual` | execution reports: approved / revised / actual × total / admin / fund per line |
 | `v_budget_approved` | the budget approved by the council (appendices 1–5) |
 | `v_budget_program` | detailed allocation: functional class × programme × economic article, city and districts |
 | `v_mtef` | medium-term forecasts by year |
-| `v_program_budget` | programme budget with programme / measure / article names in three languages |
+| `v_program_budget` | programme budget with programme / measure / article names in every language |
 | `v_summary` | total revenues and expenditures by year: budget, approved, revised, actual |
-| `v_document` | documents with type names and titles in three languages |
+| `v_document` | documents with type names and titles in every language |
 
 ## Example queries
 

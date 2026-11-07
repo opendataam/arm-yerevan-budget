@@ -1,4 +1,7 @@
-"""Static trilingual reference data: administrative districts of Yerevan."""
+"""Static reference data: administrative districts of Yerevan.
+
+Names in Armenian, English and Russian; the other languages are in ``data/translations/reference.csv``.
+"""
 
 from __future__ import annotations
 
@@ -38,11 +41,3 @@ def district_of(text: str | None) -> str | None:
     if re.search(DISTRICTS["municipality"][3], t):
         return "municipality"
     return None
-
-
-def district_rows() -> list[tuple]:
-    return [(code, v[0], v[1], v[2], i) for i, (code, v) in enumerate(DISTRICTS.items())]
-
-
-def sort_order(code: str) -> int:
-    return _ORDER.index(code)

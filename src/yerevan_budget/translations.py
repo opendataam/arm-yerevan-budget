@@ -1,7 +1,7 @@
-"""Translation dictionaries Armenian -> English / Russian.
+"""Translation dictionaries Armenian -> the languages of :data:`config.LANGS`.
 
 The dictionaries are CSV files ``data/translations/<context>.csv`` with the
-columns ``hy,en,ru`` (UTF-8), versioned in git. The build loads them into
+columns ``hy,en,ru,fr,es,pt,de,ar,fa`` (UTF-8), versioned in git. The build loads them into
 ``dim_translation`` and looks names up by the Armenian text compared with
 :func:`norm_key` (letters and digits only), so differences in punctuation,
 spacing and case do not matter.
@@ -13,7 +13,10 @@ Contexts:
 * ``economic``   – lines and articles of the economic classification;
 * ``financing``  – lines of the surplus / deficit and its financing;
 * ``program``    – programmes and measures (detailed tables of the budget);
-* ``labels``     – everything else: document titles, table titles, districts.
+* ``labels``     – everything else: document titles, table titles;
+* ``reference``  – names of the reference dimensions defined in the code (document types,
+  periods, statements, scenarios, parts of the budget, districts): English and Russian
+  come from the code, the other languages from this dictionary.
 
 List numbering at the start of a name (``1.1``, ``ա)``, ``Ա.``, ``-``) is not
 part of the key: it is split off before the lookup and put back afterwards.
@@ -22,7 +25,7 @@ Workflow for new names (e.g. after a new budget year is published)::
 
     python -m yerevan_budget build          # names without a translation: qc_missing_translation
     python -m yerevan_budget translations   # -> data/translations/pending/<context>.csv
-    # fill the en and ru columns (by hand or with a machine translation, then review)
+    # fill the empty language columns (by hand or with a machine translation, then review)
     python -m yerevan_budget translations --merge
     python -m yerevan_budget build
 """
@@ -39,8 +42,9 @@ from .parsers.common import clean, norm_key
 
 log = logging.getLogger(__name__)
 
-CONTEXTS = ("revenue", "functional", "economic", "financing", "program", "labels")
-FIELDS = ["hy", "en", "ru"]
+CONTEXTS = ("revenue", "functional", "economic", "financing", "program", "labels", "reference")
+LANGS = config.LANGS
+FIELDS = ["hy", *LANGS]
 PENDING_DIR = config.TRANSLATIONS_DIR / "pending"
 
 # list numbering at the start of a label: '1.', '1.1', '1.1.', '2.3.1.1', 'ա)', 'Ա.', '-', '1)'
@@ -95,7 +99,7 @@ class Dictionary:
         self.any: dict[str, dict] = {}
         for c, rows in self.rows.items():
             for r in rows:
-                if r["hy"] and (r["en"] or r["ru"]):
+                if r["hy"] and any(r[lang] for lang in LANGS):
                     k = norm_key(r["hy"])
                     self.index[(c, k)] = r
                     self.any.setdefault(k, r)
@@ -114,21 +118,28 @@ class Dictionary:
             return None
         return f"{enum} {r[lang]}".strip() if enum else r[lang]
 
-    def records(self) -> list[tuple[str, str, str, str | None, str | None]]:
-        return [(c, norm_key(r["hy"]), r["hy"], r["en"] or None, r["ru"] or None)
+    def records(self) -> list[tuple]:
+        """(context, key, hy, *translations) of every row, for dim_translation."""
+        return [(c, norm_key(r["hy"]), r["hy"], *(r[lang] or None for lang in LANGS))
                 for c, rows in self.rows.items() for r in rows if r["hy"]]
 
 
 def write_pending(db_path: Path | None = None) -> None:
-    """Names without a translation (from ``qc_missing_translation``) -> data/translations/pending/<context>.csv."""
+    """Names without a translation (from ``qc_missing_translation``) -> data/translations/pending/<context>.csv.
+
+    The languages a name already has in the dictionaries are filled in, so only the missing ones are left empty.
+    """
     import duckdb
 
     con = duckdb.connect(str(db_path or config.DUCKDB_PATH), read_only=True)
     rows = con.execute("SELECT context, hy FROM qc_missing_translation ORDER BY context, hy").fetchall()
     con.close()
+    d = Dictionary()
     by_ctx: dict[str, list[dict]] = {}
     for ctx, hy in rows:
-        by_ctx.setdefault(ctx, []).append({"hy": hy, "en": "", "ru": ""})
+        _enum, text = split_enum(hy)
+        known = d.lookup(ctx, text) or {}
+        by_ctx.setdefault(ctx, []).append({"hy": text, **{lang: known.get(lang, "") for lang in LANGS}})
     for ctx, items in by_ctx.items():
         write_csv(PENDING_DIR / f"{ctx}.csv", items)
         log.info("pending %s: %d names -> %s", ctx, len(items), PENDING_DIR / f"{ctx}.csv")
@@ -137,27 +148,36 @@ def write_pending(db_path: Path | None = None) -> None:
 
 
 def merge_pending() -> None:
-    """Merge filled rows of data/translations/pending/*.csv into the dictionaries (rows without en/ru are kept pending)."""
+    """Merge data/translations/pending/*.csv into the dictionaries.
+
+    Every filled cell is merged (a partly translated row too); rows with an empty language stay pending.
+    """
     for p in sorted(PENDING_DIR.glob("*.csv")):
         ctx = p.stem.split("-")[0]
         if ctx not in CONTEXTS:
             log.warning("unknown context %s (%s)", ctx, p)
             continue
-        new = read_csv(p)
-        done = [r for r in new if r["hy"] and r["en"] and r["ru"]]
-        left = [r for r in new if r not in done]
+        new = [r for r in read_csv(p) if r["hy"]]
         rows = read_csv(path(ctx))
         known = {norm_key(r["hy"]): i for i, r in enumerate(rows)}
-        for r in done:
+        merged, left = 0, []
+        for r in new:
+            if not any(r[lang] for lang in LANGS):
+                left.append(r)
+                continue
             k = norm_key(r["hy"])
             if k in known:
-                rows[known[k]] = r
+                old = rows[known[k]]
+                rows[known[k]] = {f: r[f] or old[f] for f in FIELDS}
             else:
                 known[k] = len(rows)
                 rows.append(r)
+            merged += 1
+            if not all(rows[known[k]][lang] for lang in LANGS):
+                left.append(rows[known[k]])
         write_csv(path(ctx), rows)
         if left:
             write_csv(p, left)
         else:
             p.unlink()
-        log.info("%s: merged %d, %d left pending", ctx, len(done), len(left))
+        log.info("%s: merged %d, %d left pending", ctx, merged, len(left))

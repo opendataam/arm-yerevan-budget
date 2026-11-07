@@ -19,12 +19,24 @@ Every document linked from the Finance pages (one row per distinct URL). Core do
 | `title_hy` | VARCHAR | Link text on the site (Armenian, numbering removed) |
 | `title_en` | VARCHAR |  |
 | `title_ru` | VARCHAR |  |
+| `title_fr` | VARCHAR |  |
+| `title_es` | VARCHAR |  |
+| `title_pt` | VARCHAR |  |
+| `title_de` | VARCHAR |  |
+| `title_ar` | VARCHAR |  |
+| `title_fa` | VARCHAR |  |
 | `doc_type` | VARCHAR | Type of the document, see dim_doc_type |
 | `fiscal_year` | INTEGER | Budget year the document is about (MTEF: the first of its three years; institutions: the year heading on the page) |
 | `period` | VARCHAR | Execution reports: Q1 \| H1 \| 9M \| FY (see dim_period) |
 | `institution_group_hy` | VARCHAR | Institutions: group heading on the page (schools, kindergartens, sector of community companies, ...) |
 | `institution_group_en` | VARCHAR |  |
 | `institution_group_ru` | VARCHAR |  |
+| `institution_group_fr` | VARCHAR |  |
+| `institution_group_es` | VARCHAR |  |
+| `institution_group_pt` | VARCHAR |  |
+| `institution_group_de` | VARCHAR |  |
+| `institution_group_ar` | VARCHAR |  |
+| `institution_group_fa` | VARCHAR |  |
 | `size_mb_stated` | DOUBLE | Size stated in the link text on the site, MB (institutions) |
 | `size_bytes` | BIGINT | Size of the downloaded file |
 | `sha256` | VARCHAR |  |
@@ -84,6 +96,12 @@ Parts of a community budget: administrative (current) part, fund (capital) part,
 | `budget_part` | VARCHAR |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `name_hy` | VARCHAR |  |
 
 ### `dim_district` (table, 13 rows)
@@ -96,6 +114,12 @@ Administrative districts of Yerevan and the Municipality itself: units of the de
 | `name_hy` | VARCHAR |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `sort_order` | INTEGER |  |
 
 ### `dim_doc_type` (table, 17 rows)
@@ -107,6 +131,12 @@ Types of documents (meta_document.doc_type).
 | `doc_type` | VARCHAR |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `name_hy` | VARCHAR |  |
 
 ### `dim_economic` (table, 145 rows)
@@ -120,6 +150,12 @@ Article codes printed next to the lines: economic classification of expenditures
 | `name_hy` | VARCHAR |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `first_year` | INTEGER |  |
 | `last_year` | INTEGER |  |
 
@@ -137,12 +173,18 @@ Functional classification of budget expenditures (section.group.class) as used i
 | `name_hy` | VARCHAR |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `first_year` | INTEGER |  |
 | `last_year` | INTEGER |  |
 
 ### `dim_label` (table, 2,185 rows)
 
-Every distinct row name of fact_budget_line (label_hy, program_hy) with its English and Russian translation (from dim_translation; numbering kept).
+Every distinct row name of fact_budget_line (label_hy, program_hy) with its translations into en / ru / fr / es / pt / de / ar / fa (from dim_translation; numbering kept).
 
 | column | type | description |
 |---|---|---|
@@ -150,6 +192,12 @@ Every distinct row name of fact_budget_line (label_hy, program_hy) with its Engl
 | `label_hy` | VARCHAR |  |
 | `label_en` | VARCHAR |  |
 | `label_ru` | VARCHAR |  |
+| `label_fr` | VARCHAR |  |
+| `label_es` | VARCHAR |  |
+| `label_pt` | VARCHAR |  |
+| `label_de` | VARCHAR |  |
+| `label_ar` | VARCHAR |  |
+| `label_fa` | VARCHAR |  |
 
 ### `dim_line` (table, 622 rows)
 
@@ -164,6 +212,12 @@ Lines (Տողի NN) of the standard community budget forms by statement; names (
 | `name_hy` | VARCHAR |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `first_year` | INTEGER |  |
 | `last_year` | INTEGER |  |
 | `n_names` | INTEGER | Number of different Armenian names the line had over the years |
@@ -179,6 +233,12 @@ Measures (5-digit codes, unique within a programme) of the programme budgeting t
 | `name_hy` | VARCHAR |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `description_hy` | VARCHAR |  |
 | `measure_type_hy` | VARCHAR |  |
 | `first_year` | INTEGER |  |
@@ -194,6 +254,12 @@ Reporting periods; values are cumulative from 1 January.
 | `months` | INTEGER |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `name_hy` | VARCHAR |  |
 
 ### `dim_program` (table, 62 rows)
@@ -206,6 +272,12 @@ Budget programmes of the programme budgeting tables (4-digit codes); names, goal
 | `name_hy` | VARCHAR |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `goal_hy` | VARCHAR |  |
 | `result_hy` | VARCHAR |  |
 | `first_year` | INTEGER |  |
@@ -220,6 +292,12 @@ Meaning of an amount column: approved plan, revised plan, actual, draft, forecas
 | `scenario` | VARCHAR |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `name_hy` | VARCHAR |  |
 
 ### `dim_statement` (table, 6 rows)
@@ -231,19 +309,31 @@ Statements (parts) of the budget forms: revenues, expenditures by functional / e
 | `statement` | VARCHAR |  |
 | `name_en` | VARCHAR |  |
 | `name_ru` | VARCHAR |  |
+| `name_fr` | VARCHAR |  |
+| `name_es` | VARCHAR |  |
+| `name_pt` | VARCHAR |  |
+| `name_de` | VARCHAR |  |
+| `name_ar` | VARCHAR |  |
+| `name_fa` | VARCHAR |  |
 | `name_hy` | VARCHAR |  |
 
-### `dim_translation` (table, 1,796 rows)
+### `dim_translation` (table, 1,847 rows)
 
-Translation dictionaries hy -> en / ru (data/translations/<context>.csv); key = Armenian text reduced to letters and digits.
+Translation dictionaries hy -> en / ru / fr / es / pt / de / ar / fa (data/translations/<context>.csv); key = Armenian text reduced to letters and digits.
 
 | column | type | description |
 |---|---|---|
 | `context` | VARCHAR |  |
 | `key` | VARCHAR |  |
 | `hy` | VARCHAR |  |
-| `en` | VARCHAR |  |
-| `ru` | VARCHAR |  |
+| `en` | VARCHAR | English |
+| `ru` | VARCHAR | Russian |
+| `fr` | VARCHAR | French |
+| `es` | VARCHAR | Spanish |
+| `pt` | VARCHAR | Portuguese |
+| `de` | VARCHAR | German |
+| `ar` | VARCHAR | Arabic |
+| `fa` | VARCHAR | Persian |
 
 ## Facts
 
@@ -425,7 +515,7 @@ Documents where total expenditures by functional classification (line 2000) and 
 
 ### `qc_missing_translation` (table, 0 rows)
 
-Armenian names without an English or Russian translation: names of codes (dimensions), document titles, and row names of the primary documents that have no code to fall back on (fill them with `python -m yerevan_budget translations`).
+Armenian names without a translation into one of the languages (en / ru / fr / es / pt / de / ar / fa): names of codes (dimensions), document titles, and row names of the primary documents that have no code to fall back on (fill them with `python -m yerevan_budget translations`).
 
 | column | type | description |
 |---|---|---|
@@ -530,6 +620,12 @@ Budget of the city as approved by the council (revenues, expenditures by functio
 | `label_hy` | VARCHAR |  |
 | `label_en` | VARCHAR |  |
 | `label_ru` | VARCHAR |  |
+| `label_fr` | VARCHAR |  |
+| `label_es` | VARCHAR |  |
+| `label_pt` | VARCHAR |  |
+| `label_de` | VARCHAR |  |
+| `label_ar` | VARCHAR |  |
+| `label_fa` | VARCHAR |  |
 | `total_kamd` | DOUBLE |  |
 | `admin_kamd` | DOUBLE |  |
 | `fund_kamd` | DOUBLE |  |
@@ -538,7 +634,7 @@ Budget of the city as approved by the council (revenues, expenditures by functio
 
 ### `v_budget_line` (view, 519,665 rows)
 
-fact_budget_line of the primary documents with the row names in English and Russian.
+fact_budget_line of the primary documents with the row names translated into en / ru / fr / es / pt / de / ar / fa.
 
 | column | type | description |
 |---|---|---|
@@ -556,9 +652,21 @@ fact_budget_line of the primary documents with the row names in English and Russ
 | `label_hy` | VARCHAR |  |
 | `label_en` | VARCHAR |  |
 | `label_ru` | VARCHAR |  |
+| `label_fr` | VARCHAR |  |
+| `label_es` | VARCHAR |  |
+| `label_pt` | VARCHAR |  |
+| `label_de` | VARCHAR |  |
+| `label_ar` | VARCHAR |  |
+| `label_fa` | VARCHAR |  |
 | `program_hy` | VARCHAR |  |
 | `program_en` | VARCHAR |  |
 | `program_ru` | VARCHAR |  |
+| `program_fr` | VARCHAR |  |
+| `program_es` | VARCHAR |  |
+| `program_pt` | VARCHAR |  |
+| `program_de` | VARCHAR |  |
+| `program_ar` | VARCHAR |  |
+| `program_fa` | VARCHAR |  |
 | `scenario` | VARCHAR |  |
 | `value_year` | INTEGER |  |
 | `value_period` | VARCHAR |  |
@@ -586,13 +694,31 @@ Detailed tables: expenditures by functional class, programme and economic articl
 | `func_name_hy` | VARCHAR |  |
 | `func_name_en` | VARCHAR |  |
 | `func_name_ru` | VARCHAR |  |
+| `func_name_fr` | VARCHAR |  |
+| `func_name_es` | VARCHAR |  |
+| `func_name_pt` | VARCHAR |  |
+| `func_name_de` | VARCHAR |  |
+| `func_name_ar` | VARCHAR |  |
+| `func_name_fa` | VARCHAR |  |
 | `program_hy` | VARCHAR |  |
 | `program_en` | VARCHAR |  |
 | `program_ru` | VARCHAR |  |
+| `program_fr` | VARCHAR |  |
+| `program_es` | VARCHAR |  |
+| `program_pt` | VARCHAR |  |
+| `program_de` | VARCHAR |  |
+| `program_ar` | VARCHAR |  |
+| `program_fa` | VARCHAR |  |
 | `class_code` | VARCHAR |  |
 | `label_hy` | VARCHAR |  |
 | `label_en` | VARCHAR |  |
 | `label_ru` | VARCHAR |  |
+| `label_fr` | VARCHAR |  |
+| `label_es` | VARCHAR |  |
+| `label_pt` | VARCHAR |  |
+| `label_de` | VARCHAR |  |
+| `label_ar` | VARCHAR |  |
+| `label_fa` | VARCHAR |  |
 | `scenario` | VARCHAR |  |
 | `value_year` | INTEGER |  |
 | `value_period` | VARCHAR |  |
@@ -604,7 +730,7 @@ Detailed tables: expenditures by functional class, programme and economic articl
 
 ### `v_document` (view, 510 rows)
 
-Documents of the Finance section with type names and titles in three languages.
+Documents of the Finance section with type names and titles in hy / en / ru / fr / es / pt / de / ar / fa.
 
 | column | type | description |
 |---|---|---|
@@ -613,11 +739,23 @@ Documents of the Finance section with type names and titles in three languages.
 | `doc_type` | VARCHAR |  |
 | `doc_type_en` | VARCHAR |  |
 | `doc_type_ru` | VARCHAR |  |
+| `doc_type_fr` | VARCHAR |  |
+| `doc_type_es` | VARCHAR |  |
+| `doc_type_pt` | VARCHAR |  |
+| `doc_type_de` | VARCHAR |  |
+| `doc_type_ar` | VARCHAR |  |
+| `doc_type_fa` | VARCHAR |  |
 | `fiscal_year` | INTEGER |  |
 | `period` | VARCHAR |  |
 | `title_hy` | VARCHAR |  |
 | `title_en` | VARCHAR |  |
 | `title_ru` | VARCHAR |  |
+| `title_fr` | VARCHAR |  |
+| `title_es` | VARCHAR |  |
+| `title_pt` | VARCHAR |  |
+| `title_de` | VARCHAR |  |
+| `title_ar` | VARCHAR |  |
+| `title_fa` | VARCHAR |  |
 | `url` | VARCHAR |  |
 | `ext` | VARCHAR |  |
 | `size_bytes` | BIGINT |  |
@@ -640,6 +778,12 @@ Budget execution reports (form Հ-9, quarterly and annual): approved plan, revis
 | `label_hy` | VARCHAR |  |
 | `label_en` | VARCHAR |  |
 | `label_ru` | VARCHAR |  |
+| `label_fr` | VARCHAR |  |
+| `label_es` | VARCHAR |  |
+| `label_pt` | VARCHAR |  |
+| `label_de` | VARCHAR |  |
+| `label_ar` | VARCHAR |  |
+| `label_fa` | VARCHAR |  |
 | `approved_total_kamd` | DOUBLE |  |
 | `approved_admin_kamd` | DOUBLE |  |
 | `approved_fund_kamd` | DOUBLE |  |
@@ -666,6 +810,12 @@ Annual execution reports: approved plan, revised plan, actual by line, thousand 
 | `label_hy` | VARCHAR |  |
 | `label_en` | VARCHAR |  |
 | `label_ru` | VARCHAR |  |
+| `label_fr` | VARCHAR |  |
+| `label_es` | VARCHAR |  |
+| `label_pt` | VARCHAR |  |
+| `label_de` | VARCHAR |  |
+| `label_ar` | VARCHAR |  |
+| `label_fa` | VARCHAR |  |
 | `approved_total_kamd` | DOUBLE |  |
 | `approved_admin_kamd` | DOUBLE |  |
 | `approved_fund_kamd` | DOUBLE |  |
@@ -693,6 +843,12 @@ Medium-term expenditure programmes (MTEF): forecasts of revenues, expenditures a
 | `label_hy` | VARCHAR |  |
 | `label_en` | VARCHAR |  |
 | `label_ru` | VARCHAR |  |
+| `label_fr` | VARCHAR |  |
+| `label_es` | VARCHAR |  |
+| `label_pt` | VARCHAR |  |
+| `label_de` | VARCHAR |  |
+| `label_ar` | VARCHAR |  |
+| `label_fa` | VARCHAR |  |
 | `total_kamd` | DOUBLE |  |
 | `admin_kamd` | DOUBLE |  |
 | `fund_kamd` | DOUBLE |  |
@@ -701,7 +857,7 @@ Medium-term expenditure programmes (MTEF): forecasts of revenues, expenditures a
 
 ### `v_program_budget` (view, 14,818 rows)
 
-Programme budget (budget message tables for 2025+ and medium-term programmes): amounts by unit, functional class, programme, measure and economic article, with names in hy / en / ru, thousand AMD. Totals by measure: row_type = 'measure'; by article: row_type = 'economic'.
+Programme budget (budget message tables for 2025+ and medium-term programmes): amounts by unit, functional class, programme, measure and economic article, with names in hy / en / ru / fr / es / pt / de / ar / fa, thousand AMD. Totals by measure: row_type = 'measure'; by article: row_type = 'economic'.
 
 | column | type | description |
 |---|---|---|
@@ -711,6 +867,12 @@ Programme budget (budget message tables for 2025+ and medium-term programmes): a
 | `district_code` | VARCHAR |  |
 | `district_en` | VARCHAR |  |
 | `district_ru` | VARCHAR |  |
+| `district_fr` | VARCHAR |  |
+| `district_es` | VARCHAR |  |
+| `district_pt` | VARCHAR |  |
+| `district_de` | VARCHAR |  |
+| `district_ar` | VARCHAR |  |
+| `district_fa` | VARCHAR |  |
 | `row_type` | VARCHAR |  |
 | `func_code` | VARCHAR |  |
 | `func_name_en` | VARCHAR |  |
@@ -718,14 +880,32 @@ Programme budget (budget message tables for 2025+ and medium-term programmes): a
 | `program_hy` | VARCHAR |  |
 | `program_en` | VARCHAR |  |
 | `program_ru` | VARCHAR |  |
+| `program_fr` | VARCHAR |  |
+| `program_es` | VARCHAR |  |
+| `program_pt` | VARCHAR |  |
+| `program_de` | VARCHAR |  |
+| `program_ar` | VARCHAR |  |
+| `program_fa` | VARCHAR |  |
 | `measure_code` | VARCHAR |  |
 | `measure_hy` | VARCHAR |  |
 | `measure_en` | VARCHAR |  |
 | `measure_ru` | VARCHAR |  |
+| `measure_fr` | VARCHAR |  |
+| `measure_es` | VARCHAR |  |
+| `measure_pt` | VARCHAR |  |
+| `measure_de` | VARCHAR |  |
+| `measure_ar` | VARCHAR |  |
+| `measure_fa` | VARCHAR |  |
 | `econ_code` | VARCHAR |  |
 | `econ_hy` | VARCHAR |  |
 | `econ_en` | VARCHAR |  |
 | `econ_ru` | VARCHAR |  |
+| `econ_fr` | VARCHAR |  |
+| `econ_es` | VARCHAR |  |
+| `econ_pt` | VARCHAR |  |
+| `econ_de` | VARCHAR |  |
+| `econ_ar` | VARCHAR |  |
+| `econ_fa` | VARCHAR |  |
 | `label_hy` | VARCHAR |  |
 | `amount_kamd` | DOUBLE |  |
 | `doc_id` | VARCHAR |  |

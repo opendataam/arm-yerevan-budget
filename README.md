@@ -22,8 +22,9 @@ the main page and the archive pages of 2018–2025. The pipeline collects **all 
 
 The result is the DuckDB database `data/yerevan_budget.duckdb`: ≈530 000 amounts in a long fact table with the
 meaning of every column (scenario, year, period, part of the budget), the programme budget, classifiers with
-**names in Armenian, English and Russian**, the full text of every page and every table cell of the source,
-data quality checks and documentation in three languages.
+**names in Armenian and eight translations** (English, Russian, French, Spanish, Portuguese, German, Arabic,
+Persian), the full text of every page and every table cell of the source, data quality checks and documentation in
+three languages.
 
 ## Ready-made data: releases
 
@@ -88,7 +89,7 @@ duckdb -readonly data/yerevan_budget.duckdb -c "
 │   ├── fetch.py               step 2: download, unpack archives
 │   ├── extract.py             step 3: text and tables of PDF / XLS / XLSX / DOC / DOCX (legacy fonts, glyph maps)
 │   ├── build.py               step 4: DuckDB build
-│   ├── translations.py        hy -> en / ru dictionaries (data/translations)
+│   ├── translations.py        hy -> en / ru / fr / es / pt / de / ar / fa dictionaries (data/translations)
 │   ├── reference.py           districts of Yerevan
 │   ├── docs.py, release.py    generated documentation; data snapshots in GitHub releases
 │   ├── cli.py, __main__.py    command line
@@ -100,7 +101,7 @@ duckdb -readonly data/yerevan_budget.duckdb -c "
 │   └── qc.sql                 data quality checks
 ├── data/
 │   ├── catalog/               manifests (in git): pages.json, documents.json
-│   ├── translations/          translation dictionaries hy -> en / ru (in git) and GLOSSARY.md
+│   ├── translations/          translation dictionaries hy -> 8 languages (in git) and GLOSSARY.md
 │   ├── raw/                   downloaded pages, documents, unpacked archives (not in git; in releases)
 │   ├── interim/               extracted text and tables (not in git; in releases)
 │   └── yerevan_budget.duckdb  result (not in git; in releases)
@@ -122,7 +123,7 @@ The documentation is available in English ([docs/en](docs/en)), Armenian ([docs/
 | [documents.md](docs/en/documents.md) | contents of each kind of document and how tables are recognised |
 | [database.md](docs/en/database.md) | database design: principles, schema (ER), tables, views, example queries |
 | [data_dictionary.md](docs/data_dictionary.md) | all tables and columns (generated) |
-| [translations.md](docs/en/translations.md) | names in three languages: dictionaries, method, how to translate new names |
+| [translations.md](docs/en/translations.md) | names in nine languages: languages, dictionaries, method, how to translate new names |
 | [data_quality.md](docs/en/data_quality.md) | data quality checks and known issues |
 | [inventory.md](docs/en/inventory.md) | list of documents (generated) |
 | [maintenance.md](docs/en/maintenance.md) | updates, new documents, changes on the site, code layout |
@@ -140,7 +141,7 @@ The documentation is available in English ([docs/en](docs/en)), Armenian ([docs/
 | `v_summary` | totals by year |
 | `fact_budget_line` | all amounts of the standard forms (long form) |
 | `fact_program_budget`, `fact_program_indicator` | programme budget allocations and performance indicators |
-| `dim_functional`, `dim_economic`, `dim_line`, `dim_program`, `dim_measure`, `dim_district`, `dim_label` | classifiers and names in hy / en / ru |
+| `dim_functional`, `dim_economic`, `dim_line`, `dim_program`, `dim_measure`, `dim_district`, `dim_label` | classifiers and names in hy and every translation language (`*_en` … `*_fa`) |
 | `meta_document`, `meta_file` | documents and files with provenance |
 | `raw_page_text`, `raw_table_cell`, `stg_table_row` | lossless source text, cells and table rows |
 

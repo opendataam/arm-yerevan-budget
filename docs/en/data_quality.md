@@ -20,7 +20,7 @@ SELECT * FROM qc_summary ORDER BY check_name;
 | `documents_with_facts` | every budget, execution report, MTEF and execution-measures document gave facts | the annual explanatory notes 2023–2025 have no form tables (their form Հ-9 is a separate document) |
 | `files_extracted` | every file could be read | OK |
 | `tables_with_unknown_layout` | tables with numbers that have no row of column numbers | INFO: budget messages, explanatory notes, staff lists, parts of the execution measures – their cells are in `raw_table_cell` |
-| `translations_complete` | every name has an English and a Russian translation | see [translations.md](translations.md) |
+| `translations_complete` | every name has a translation into every language (en, ru, fr, es, pt, de, ar, fa) | see [translations.md](translations.md) |
 
 `qc_coverage` lists the core documents by type and year and how many amounts each gave.
 

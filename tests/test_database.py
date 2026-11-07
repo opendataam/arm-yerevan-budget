@@ -64,11 +64,21 @@ def test_amount_semantics_complete(con):
     assert one(con, "SELECT count(*) FROM fact_budget_line WHERE value_year IS NULL") == 0
 
 
-def test_names_in_three_languages(con):
+def test_names_in_every_language(con):
     assert one(con, "SELECT count(*) FROM qc_missing_translation") == 0
-    assert one(con, "SELECT avg((label_en IS NOT NULL)::INT) FROM v_budget_line") > 0.99
-    assert one(con, "SELECT count(*) FROM dim_functional WHERE name_en IS NULL OR name_ru IS NULL") == 0
-    assert one(con, "SELECT count(*) FROM meta_document WHERE title_en IS NULL OR title_ru IS NULL") == 0
+    for lang in config.LANGS:
+        assert one(con, f"SELECT avg((label_{lang} IS NOT NULL)::INT) FROM v_budget_line") > 0.99, lang
+        for table, col in (("dim_functional", "name"), ("dim_economic", "name"), ("dim_line", "name"),
+                           ("dim_program", "name"), ("dim_measure", "name"), ("dim_district", "name"),
+                           ("dim_doc_type", "name"), ("dim_statement", "name"), ("meta_document", "title")):
+            assert one(con, f"SELECT count(*) FROM {table} WHERE {col}_hy IS NOT NULL AND {col}_{lang} IS NULL") == 0, \
+                (table, lang)
+    # every view with English names has the same names in the other languages
+    for view, col in (("v_budget_line", "label"), ("v_execution", "label"), ("v_budget_approved", "label"),
+                      ("v_budget_program", "program"), ("v_mtef", "label"), ("v_document", "title"),
+                      ("v_program_budget", "measure")):
+        cols = {r[0] for r in con.execute(f"DESCRIBE {view}").fetchall()}
+        assert {f"{col}_{lang}" for lang in config.LANGS} <= cols, view
 
 
 def test_districts(con):

@@ -1,7 +1,9 @@
 -- DuckDB schema of the Yerevan city budget database.
 -- Table prefixes:
 --   meta_  provenance: site pages, documents, files (archive members)
---   dim_   reference dimensions with names in Armenian (hy), English (en) and Russian (ru)
+--   dim_   reference dimensions with names in Armenian (hy) and its translations
+-- Name columns: a line with {lang} is repeated for every translation language (config.LANGS: en, ru, fr, es,
+-- pt, de, ar, fa) and {langs} is replaced with their list when the file is run (build.render_sql).
 --   fact_  normalised facts parsed from the budget tables
 --   stg_   staging: every logical row of every recognised budget table (before interpretation)
 --   raw_   lossless dump: text of every page, every table cell and spreadsheet cell
@@ -37,14 +39,12 @@ CREATE TABLE meta_document (
     file_name             VARCHAR,
     ext                   VARCHAR,
     title_hy              VARCHAR,
-    title_en              VARCHAR,
-    title_ru              VARCHAR,
+    title_{lang}          VARCHAR,
     doc_type              VARCHAR,
     fiscal_year           INTEGER,
     period                VARCHAR,
     institution_group_hy  VARCHAR,
-    institution_group_en  VARCHAR,
-    institution_group_ru  VARCHAR,
+    institution_group_{lang} VARCHAR,
     size_mb_stated        DOUBLE,
     size_bytes            BIGINT,
     sha256                VARCHAR,
@@ -99,23 +99,47 @@ COMMENT ON COLUMN meta_file.n_unmapped_tables IS 'Tables with numbers whose colu
 ------------------------------------------------------------------------------
 -- dimensions
 ------------------------------------------------------------------------------
-CREATE TABLE dim_doc_type (doc_type VARCHAR PRIMARY KEY, name_en VARCHAR, name_ru VARCHAR, name_hy VARCHAR);
+CREATE TABLE dim_doc_type (
+    doc_type VARCHAR PRIMARY KEY,
+    name_{lang} VARCHAR,
+    name_hy VARCHAR
+);
 COMMENT ON TABLE dim_doc_type IS 'Types of documents (meta_document.doc_type).';
 
-CREATE TABLE dim_period (period VARCHAR PRIMARY KEY, months INTEGER, name_en VARCHAR, name_ru VARCHAR, name_hy VARCHAR);
+CREATE TABLE dim_period (
+    period  VARCHAR PRIMARY KEY,
+    months  INTEGER,
+    name_{lang} VARCHAR,
+    name_hy VARCHAR
+);
 COMMENT ON TABLE dim_period IS 'Reporting periods; values are cumulative from 1 January.';
 
-CREATE TABLE dim_statement (statement VARCHAR PRIMARY KEY, name_en VARCHAR, name_ru VARCHAR, name_hy VARCHAR);
+CREATE TABLE dim_statement (
+    statement VARCHAR PRIMARY KEY,
+    name_{lang} VARCHAR,
+    name_hy VARCHAR
+);
 COMMENT ON TABLE dim_statement IS 'Statements (parts) of the budget forms: revenues, expenditures by functional / economic classification, balance, financing, detailed programme tables.';
 
-CREATE TABLE dim_scenario (scenario VARCHAR PRIMARY KEY, name_en VARCHAR, name_ru VARCHAR, name_hy VARCHAR);
+CREATE TABLE dim_scenario (
+    scenario VARCHAR PRIMARY KEY,
+    name_{lang} VARCHAR,
+    name_hy VARCHAR
+);
 COMMENT ON TABLE dim_scenario IS 'Meaning of an amount column: approved plan, revised plan, actual, draft, forecast, plan for the period.';
 
-CREATE TABLE dim_budget_part (budget_part VARCHAR PRIMARY KEY, name_en VARCHAR, name_ru VARCHAR, name_hy VARCHAR);
+CREATE TABLE dim_budget_part (
+    budget_part VARCHAR PRIMARY KEY,
+    name_{lang} VARCHAR,
+    name_hy VARCHAR
+);
 COMMENT ON TABLE dim_budget_part IS 'Parts of a community budget: administrative (current) part, fund (capital) part, total.';
 
 CREATE TABLE dim_district (
-    district_code VARCHAR PRIMARY KEY, name_hy VARCHAR, name_en VARCHAR, name_ru VARCHAR, sort_order INTEGER
+    district_code VARCHAR PRIMARY KEY,
+    name_hy       VARCHAR,
+    name_{lang}   VARCHAR,
+    sort_order    INTEGER
 );
 COMMENT ON TABLE dim_district IS 'Administrative districts of Yerevan and the Municipality itself: units of the detailed tables of the budget (appendix 7 of the budget decision, programme budget tables).';
 
@@ -126,8 +150,7 @@ CREATE TABLE dim_functional (
     func_class    VARCHAR,
     level         VARCHAR,
     name_hy       VARCHAR,
-    name_en       VARCHAR,
-    name_ru       VARCHAR,
+    name_{lang}   VARCHAR,
     first_year    INTEGER,
     last_year     INTEGER
 );
@@ -139,8 +162,7 @@ CREATE TABLE dim_economic (
     econ_code   VARCHAR PRIMARY KEY,
     kind        VARCHAR,
     name_hy     VARCHAR,
-    name_en     VARCHAR,
-    name_ru     VARCHAR,
+    name_{lang} VARCHAR,
     first_year  INTEGER,
     last_year   INTEGER
 );
@@ -153,8 +175,7 @@ CREATE TABLE dim_line (
     class_code   VARCHAR,
     func_code    VARCHAR,
     name_hy      VARCHAR,
-    name_en      VARCHAR,
-    name_ru      VARCHAR,
+    name_{lang}  VARCHAR,
     first_year   INTEGER,
     last_year    INTEGER,
     n_names      INTEGER,
@@ -168,11 +189,11 @@ CREATE TABLE dim_translation (
     context  VARCHAR,
     key      VARCHAR,
     hy       VARCHAR,
-    en       VARCHAR,
-    ru       VARCHAR,
+    {lang}   VARCHAR,
     PRIMARY KEY (context, key)
 );
-COMMENT ON TABLE dim_translation IS 'Translation dictionaries hy -> en / ru (data/translations/<context>.csv); key = Armenian text reduced to letters and digits.';
+COMMENT ON TABLE dim_translation IS 'Translation dictionaries hy -> {langs} (data/translations/<context>.csv); key = Armenian text reduced to letters and digits.';
+COMMENT ON COLUMN dim_translation.{lang} IS '{language}';
 
 ------------------------------------------------------------------------------
 -- staging and facts
@@ -283,8 +304,7 @@ COMMENT ON COLUMN raw_table_cell.value_num IS 'Numeric value of spreadsheet cell
 CREATE TABLE dim_program (
     program_code  VARCHAR PRIMARY KEY,
     name_hy       VARCHAR,
-    name_en       VARCHAR,
-    name_ru       VARCHAR,
+    name_{lang}   VARCHAR,
     goal_hy       VARCHAR,
     result_hy     VARCHAR,
     first_year    INTEGER,
@@ -296,8 +316,7 @@ CREATE TABLE dim_measure (
     program_code    VARCHAR NOT NULL,
     measure_code    VARCHAR NOT NULL,
     name_hy         VARCHAR,
-    name_en         VARCHAR,
-    name_ru         VARCHAR,
+    name_{lang}     VARCHAR,
     description_hy  VARCHAR,
     measure_type_hy VARCHAR,
     first_year      INTEGER,

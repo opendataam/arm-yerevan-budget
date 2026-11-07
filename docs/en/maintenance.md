@@ -76,7 +76,7 @@ page by [`parsers/pages.py`](../../src/yerevan_budget/parsers/pages.py).
 | `parsers/semantics.py` | statements, row types, meaning of amount columns |
 | `parsers/program_tables.py` | programme-budget tables (ԾԲ) |
 | `parsers/common.py` | values, codes, names |
-| `translations.py` | dictionaries hy → en / ru |
+| `translations.py` | dictionaries hy → en / ru / fr / es / pt / de / ar / fa |
 | `reference.py` | districts of Yerevan |
 | `docs.py`, `release.py` | generated documentation, data snapshots in GitHub releases |
 | `cli.py`, `__main__.py` | command line |

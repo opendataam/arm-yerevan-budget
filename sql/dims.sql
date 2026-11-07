@@ -22,10 +22,11 @@ SELECT f.*, regexp_replace(f.label_hy, '^[-–]\s*', '') AS name,
 FROM fact_budget_line f
 WHERE f.col_no = 1 AND f.label_hy IS NOT NULL;
 
-INSERT INTO dim_functional
+-- names: Armenian here, the translations are filled by the build (build._translate_dims)
+INSERT INTO dim_functional (func_code, func_section, func_group, func_class, level, name_hy, first_year, last_year)
 SELECT n.func_code, split_part(n.func_code, '.', 1), split_part(n.func_code, '.', 2), split_part(n.func_code, '.', 3),
        CASE WHEN n.func_code LIKE '%.0.0' THEN 'section' WHEN n.func_code LIKE '%.0' THEN 'group' ELSE 'class' END,
-       n.name, NULL, NULL, y.first_year, y.last_year
+       n.name, y.first_year, y.last_year
 FROM _named n
 JOIN (SELECT func_code, min(fiscal_year) AS first_year, max(fiscal_year) AS last_year
       FROM fact_budget_line WHERE func_code IS NOT NULL AND row_type IN ('line', 'functional') GROUP BY func_code) y
@@ -33,11 +34,11 @@ JOIN (SELECT func_code, min(fiscal_year) AS first_year, max(fiscal_year) AS last
 WHERE n.row_type IN ('line', 'functional') AND n.func_code IS NOT NULL
 QUALIFY row_number() OVER (PARTITION BY n.func_code ORDER BY n.rn_func) = 1;
 
-INSERT INTO dim_economic
+INSERT INTO dim_economic (econ_code, kind, name_hy, first_year, last_year)
 SELECT n.class_code,
        CASE WHEN n.class_code < '4' THEN 'other' WHEN n.class_code < '7' THEN 'expenditure'
             WHEN n.class_code < '8' THEN 'revenue' ELSE 'financing' END,
-       n.name, NULL, NULL, y.first_year, y.last_year
+       n.name, y.first_year, y.last_year
 FROM _named n
 JOIN (SELECT class_code, min(fiscal_year) AS first_year, max(fiscal_year) AS last_year
       FROM fact_budget_line WHERE class_code IS NOT NULL GROUP BY class_code) y USING (class_code)
@@ -46,8 +47,8 @@ QUALIFY row_number() OVER (PARTITION BY n.class_code
                            ORDER BY (n.statement IN ('expenditure_economic', 'expenditure_program', 'financing')) DESC,
                                     n.rn_class) = 1;
 
-INSERT INTO dim_line
-SELECT n.statement, n.line_code, n.class_code, n.func_code, n.name, NULL, NULL, y.first_year, y.last_year, y.n_names
+INSERT INTO dim_line (statement, line_code, class_code, func_code, name_hy, first_year, last_year, n_names)
+SELECT n.statement, n.line_code, n.class_code, n.func_code, n.name, y.first_year, y.last_year, y.n_names
 FROM _named n
 JOIN (SELECT statement, line_code, min(fiscal_year) AS first_year, max(fiscal_year) AS last_year,
              count(DISTINCT label_hy) AS n_names

@@ -143,3 +143,36 @@ def test_translation_keys():
     assert split_enum("ա) Քաղաքացիական") == ("ա)", "Քաղաքացիական")
     assert split_enum("- Այլ ծախսեր") == ("-", "Այլ ծախսեր")
     assert strip_formula("1. ՀԱՐԿԵՐ ԵՎ ՏՈՒՐՔԵՐ (տող 1110 + տող 1120), այդ թվում`") == "1. ՀԱՐԿԵՐ ԵՎ ՏՈՒՐՔԵՐ"
+
+
+def test_render_sql_repeats_language_lines():
+    from yerevan_budget import config
+    from yerevan_budget.build import render_sql
+
+    sql = render_sql("SELECT a,\n       x.name_{lang} AS name_{lang},\n  -- name_{lang} stays\nFROM t; -- {langs}")
+    lines = sql.splitlines()
+    assert lines[1:1 + len(config.LANGS)] == [f"       x.name_{lang} AS name_{lang}," for lang in config.LANGS]
+    assert "  -- name_{lang} stays" in lines
+    assert lines[-1] == "FROM t; -- " + " / ".join(config.LANGS)
+    assert "[a-z]{2}" in render_sql("WHERE c ~ '[a-z]{2}'")
+
+
+def test_merge_pending_partial(tmp_path, monkeypatch):
+    from yerevan_budget import translations as tr
+
+    monkeypatch.setattr(tr.config, "TRANSLATIONS_DIR", tmp_path)
+    monkeypatch.setattr(tr, "PENDING_DIR", tmp_path / "pending")
+    empty = {lang: "" for lang in tr.LANGS}
+    tr.write_csv(tr.path("labels"), [{"hy": "Ավան", **empty, "en": "Avan", "ru": "Аван"}])
+    full = {lang: f"Avan-{lang}" for lang in tr.LANGS}
+    tr.write_csv(tr.PENDING_DIR / "labels.csv", [
+        {"hy": "Ավան", **empty, "fr": "Avan"},          # fills one language of a known name
+        {"hy": "Կենտրոն", **full},                     # new, complete
+        {"hy": "Էրեբունի", **empty},                    # nothing filled: stays pending
+    ])
+    tr.merge_pending()
+    rows = {r["hy"]: r for r in tr.read_csv(tr.path("labels"))}
+    assert rows["Ավան"]["en"] == "Avan" and rows["Ավան"]["fr"] == "Avan" and rows["Ավան"]["de"] == ""
+    assert rows["Կենտրոն"] == {"hy": "Կենտրոն", **full}
+    left = [r["hy"] for r in tr.read_csv(tr.PENDING_DIR / "labels.csv")]
+    assert left == ["Ավան", "Էրեբունի"]

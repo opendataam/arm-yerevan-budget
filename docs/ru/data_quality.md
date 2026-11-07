@@ -20,7 +20,7 @@ SELECT * FROM qc_summary ORDER BY check_name;
 | `documents_with_facts` | каждый бюджет, отчёт, MTEF и документ о мерах исполнения дал факты | у годовых пояснительных записок 2023–2025 нет таблиц форм (их форма Հ-9 — отдельный документ) |
 | `files_extracted` | каждый файл прочитан | OK |
 | `tables_with_unknown_layout` | таблицы с числами без строки номеров столбцов | INFO: бюджетные послания, пояснительные записки, штатные расписания, части мер исполнения — их ячейки в `raw_table_cell` |
-| `translations_complete` | у каждого названия есть английский и русский перевод | см. [translations.md](translations.md) |
+| `translations_complete` | у каждого названия есть перевод на каждый язык (en, ru, fr, es, pt, de, ar, fa) | см. [translations.md](translations.md) |
 
 `qc_coverage` перечисляет основные документы по типам и годам и число сумм из каждого.
 

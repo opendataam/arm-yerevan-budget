@@ -77,7 +77,7 @@ make release            # новый релиз data-<дата сбора> с б
 | `parsers/semantics.py` | разделы, типы строк, смысл столбцов сумм |
 | `parsers/program_tables.py` | таблицы программного бюджета (ԾԲ) |
 | `parsers/common.py` | значения, коды, названия |
-| `translations.py` | словари hy → en / ru |
+| `translations.py` | словари hy → en / ru / fr / es / pt / de / ar / fa |
 | `reference.py` | районы Еревана |
 | `docs.py`, `release.py` | генерируемая документация, снимки данных в релизах GitHub |
 | `cli.py`, `__main__.py` | командная строка |

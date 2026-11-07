@@ -50,8 +50,29 @@ def insert(con: duckdb.DuckDBPyConnection, table: str, records: list[dict] | pd.
     return len(df)
 
 
+def render_sql(text: str) -> str:
+    """Expand the language placeholders of the SQL files.
+
+    A line containing ``{lang}`` is repeated for every translation language (:data:`config.LANGS`), with
+    ``{language}`` replaced by its English name; ``{langs}`` anywhere becomes ``en / ru / ...``.
+    Comment lines (``--``) are left as they are.
+    """
+    out = []
+    for line in text.splitlines():
+        if line.lstrip().startswith("--"):
+            out.append(line)
+            continue
+        line = line.replace("{langs}", " / ".join(config.LANGS))
+        if "{lang}" in line:
+            out += [line.replace("{lang}", lang).replace("{language}", config.LANG_NAMES[lang])
+                    for lang in config.LANGS]
+        else:
+            out.append(line)
+    return "\n".join(out) + "\n"
+
+
 def run_sql_file(con, path: Path) -> None:
-    con.execute(path.read_text(encoding="utf-8"))
+    con.execute(render_sql(path.read_text(encoding="utf-8")))
 
 
 # ---------------------------------------------------------------------------
@@ -168,11 +189,28 @@ def interpret(rows: list[bt.Row], doc: dict, file_id: str) -> tuple[list[dict], 
 
 def _title_translations(docs: list[dict], d: Dictionary) -> None:
     for rec in docs:
-        rec["title_en"] = d.get("labels", rec["title_hy"], "en")
-        rec["title_ru"] = d.get("labels", rec["title_hy"], "ru")
         g = rec.get("institution_group_hy")
-        rec["institution_group_en"] = d.get("labels", g, "en") if g else None
-        rec["institution_group_ru"] = d.get("labels", g, "ru") if g else None
+        for lang in config.LANGS:
+            rec[f"title_{lang}"] = d.get("labels", rec["title_hy"], lang)
+            rec[f"institution_group_{lang}"] = d.get("labels", g, lang) if g else None
+
+
+def _reference_dims(con, d: Dictionary) -> None:
+    """Reference dimensions defined in the code with their names in en, ru and hy; the other languages come from
+    the dictionary ``reference`` (looked up by the Armenian name)."""
+    def names(hy: str, en: str, ru: str) -> dict:
+        return {"name_hy": hy, **{f"name_{lang}": {"en": en, "ru": ru}.get(lang) or d.get("reference", hy, lang)
+                                  for lang in config.LANGS}}
+
+    insert(con, "dim_doc_type", [{"doc_type": k, **names(hy, en, ru)} for k, (en, ru, hy) in classify.DOC_TYPES.items()])
+    insert(con, "dim_period", [{"period": k, "months": months, **names(hy, en, ru)}
+                               for k, (months, en, ru, hy) in classify.PERIODS.items()])
+    for table, key, items in (("dim_statement", "statement", semantics.KINDS),
+                              ("dim_scenario", "scenario", semantics.SCENARIOS),
+                              ("dim_budget_part", "budget_part", semantics.PARTS)):
+        insert(con, table, [{key: k, **names(hy, en, ru)} for k, (en, ru, hy) in items.items()])
+    insert(con, "dim_district", [{"district_code": code, "sort_order": i, **names(hy, en, ru)}
+                                 for i, (code, (hy, en, ru, _rx)) in enumerate(reference.DISTRICTS.items())])
 
 
 def build(db_path: str | None = None) -> Path:
@@ -189,14 +227,9 @@ def build(db_path: str | None = None) -> Path:
     dictionary = Dictionary()
 
     # reference dimensions
-    con.executemany("INSERT INTO dim_doc_type VALUES (?, ?, ?, ?)", [(k, *v) for k, v in classify.DOC_TYPES.items()])
-    con.executemany("INSERT INTO dim_period VALUES (?, ?, ?, ?, ?)", [(k, *v) for k, v in classify.PERIODS.items()])
-    con.executemany("INSERT INTO dim_statement VALUES (?, ?, ?, ?)", [(k, *v) for k, v in semantics.KINDS.items()])
-    con.executemany("INSERT INTO dim_scenario VALUES (?, ?, ?, ?)", [(k, *v) for k, v in semantics.SCENARIOS.items()])
-    con.executemany("INSERT INTO dim_budget_part VALUES (?, ?, ?, ?)", [(k, *v) for k, v in semantics.PARTS.items()])
-    con.executemany("INSERT INTO dim_district VALUES (?, ?, ?, ?, ?)", reference.district_rows())
+    _reference_dims(con, dictionary)
     insert(con, "dim_translation", pd.DataFrame(
-        dictionary.records(), columns=["context", "key", "hy", "en", "ru"]).drop_duplicates(["context", "key"]))
+        dictionary.records(), columns=["context", "key", "hy", *config.LANGS]).drop_duplicates(["context", "key"]))
 
     # pages and documents
     insert(con, "meta_page", [{**p, "page_group": p["group"]} for p in pages])
@@ -327,15 +360,15 @@ def _program_dims(con, programs: list[dict], measures: list[dict], d: Dictionary
     progs = latest(programs, lambda p: p["code"], [("name", "name_hy"), ("goal", "goal_hy"), ("result", "result_hy")])
     for p in progs:
         p["program_code"] = p["key"]
-        p["name_en"] = d.get("program", p.get("name_hy"), "en")
-        p["name_ru"] = d.get("program", p.get("name_hy"), "ru")
+        for lang in config.LANGS:
+            p[f"name_{lang}"] = d.get("program", p.get("name_hy"), lang)
     insert(con, "dim_program", progs)
     meas = latest(measures, lambda m: (m["program_code"], m["code"]),
                   [("name", "name_hy"), ("description", "description_hy"), ("measure_type", "measure_type_hy")])
     for m in meas:
         m["program_code"], m["measure_code"] = m["key"]
-        m["name_en"] = d.get("program", m.get("name_hy"), "en")
-        m["name_ru"] = d.get("program", m.get("name_hy"), "ru")
+        for lang in config.LANGS:
+            m[f"name_{lang}"] = d.get("program", m.get("name_hy"), lang)
     insert(con, "dim_measure", meas)
 
 
@@ -350,7 +383,7 @@ CONTEXT_OF_STATEMENT = {
 
 
 def _translate_dims(con, d: Dictionary) -> None:
-    """Fill name_en / name_ru of the dimensions and the label translations of the facts."""
+    """Fill the name_<lang> columns of the dimensions and the label translations of the facts."""
     for table, key_cols, ctx_sql in (
             ("dim_functional", ["func_code"], "'functional'"),
             ("dim_economic", ["econ_code"], "'economic'"),
@@ -359,10 +392,11 @@ def _translate_dims(con, d: Dictionary) -> None:
         upd = []
         for *keys, ctx, name in rows:
             ctx = CONTEXT_OF_STATEMENT.get(ctx, ctx)
-            upd.append((d.get(ctx, name, "en"), d.get(ctx, name, "ru"), *keys))
+            upd.append((*(d.get(ctx, name, lang) for lang in config.LANGS), *keys))
         where = " AND ".join(f"{k} = ?" for k in key_cols)
-        con.executemany(f"UPDATE {table} SET name_en = ?, name_ru = ? WHERE {where}", upd)
-    # every distinct label of the facts in the three languages
+        sets = ", ".join(f"name_{lang} = ?" for lang in config.LANGS)
+        con.executemany(f"UPDATE {table} SET {sets} WHERE {where}", upd)
+    # every distinct label of the facts in every language
     labels = con.execute("""
         SELECT DISTINCT statement, label_hy FROM fact_budget_line WHERE label_hy IS NOT NULL
         UNION SELECT DISTINCT 'expenditure_program', program_hy FROM fact_budget_line WHERE program_hy IS NOT NULL
@@ -374,12 +408,12 @@ def _translate_dims(con, d: Dictionary) -> None:
     recs = []
     for statement, label in labels:
         ctx = CONTEXT_OF_STATEMENT.get(statement, "labels")
-        recs.append({"context": ctx, "label_hy": label, "label_en": d.get(ctx, label, "en"),
-                     "label_ru": d.get(ctx, label, "ru")})
-    con.execute("CREATE TABLE dim_label (context VARCHAR, label_hy VARCHAR, label_en VARCHAR, label_ru VARCHAR, "
-                "PRIMARY KEY (context, label_hy))")
+        recs.append({"context": ctx, "label_hy": label,
+                     **{f"label_{lang}": d.get(ctx, label, lang) for lang in config.LANGS}})
+    label_cols = "".join(f"label_{lang} VARCHAR, " for lang in config.LANGS)
+    con.execute(f"CREATE TABLE dim_label (context VARCHAR, label_hy VARCHAR, {label_cols}PRIMARY KEY (context, label_hy))")
     insert(con, "dim_label", pd.DataFrame(recs).drop_duplicates(["context", "label_hy"]))
     con.execute("COMMENT ON TABLE dim_label IS 'Every distinct row name of fact_budget_line (label_hy, program_hy) "
-                "with its English and Russian translation (from dim_translation; numbering kept).'")
+                f"with its translations into {' / '.join(config.LANGS)} (from dim_translation; numbering kept).'")
     con.execute("COMMENT ON COLUMN dim_label.context IS 'Translation context: revenue | functional | economic | "
                 "financing | program'")

@@ -22,8 +22,9 @@
 
 Արդյունքը DuckDB տվյալների բազա է՝ `data/yerevan_budget.duckdb`. ≈530 000 գումար փաստերի «երկար» աղյուսակում՝
 յուրաքանչյուր սյան իմաստով (սցենար, տարի, ժամանակահատված, բյուջեի մաս), ծրագրային բյուջե, դասակարգիչներ՝
-**հայերեն, անգլերեն և ռուսերեն անվանումներով**, աղբյուրի յուրաքանչյուր էջի ամբողջական տեքստը և աղյուսակների
-յուրաքանչյուր բջիջը, տվյալների որակի ստուգումներ և փաստաթղթավորում երեք լեզվով։
+**հայերեն և ութ լեզվով թարգմանված անվանումներով** (անգլերեն, ռուսերեն, ֆրանսերեն, իսպաներեն, պորտուգալերեն,
+գերմաներեն, արաբերեն, պարսկերեն), աղբյուրի յուրաքանչյուր էջի ամբողջական տեքստը և աղյուսակների յուրաքանչյուր
+բջիջը, տվյալների որակի ստուգումներ և փաստաթղթավորում երեք լեզվով։
 
 ## Պատրաստի տվյալներ. թողարկումներ (releases)
 
@@ -88,7 +89,7 @@ duckdb -readonly data/yerevan_budget.duckdb -c "
 │   ├── fetch.py               քայլ 2. ներբեռնում, արխիվների բացում
 │   ├── extract.py             քայլ 3. PDF / XLS / XLSX / DOC / DOCX տեքստ և աղյուսակներ (հին տառատեսակներ, գլիֆների քարտեզներ)
 │   ├── build.py               քայլ 4. DuckDB բազայի կառուցում
-│   ├── translations.py        hy -> en / ru բառարաններ (data/translations)
+│   ├── translations.py        hy -> en / ru / fr / es / pt / de / ar / fa բառարաններ (data/translations)
 │   ├── reference.py           Երևանի վարչական շրջաններ
 │   ├── docs.py, release.py    ավտոմատ փաստաթղթավորում. տվյալների պատկերներ GitHub թողարկումներում
 │   ├── cli.py, __main__.py    հրամանային տող
@@ -100,7 +101,7 @@ duckdb -readonly data/yerevan_budget.duckdb -c "
 │   └── qc.sql                 տվյալների որակի ստուգումներ
 ├── data/
 │   ├── catalog/               մանիֆեստներ (git-ում). pages.json, documents.json
-│   ├── translations/          hy -> en / ru թարգմանությունների բառարաններ (git-ում) և GLOSSARY.md
+│   ├── translations/          hy -> 8 լեզու թարգմանությունների բառարաններ (git-ում) և GLOSSARY.md
 │   ├── raw/                   ներբեռնված էջեր, փաստաթղթեր, բացված արխիվներ (git-ում չեն. թողարկումներում)
 │   ├── interim/               արտահանված տեքստ և աղյուսակներ (git-ում չեն. թողարկումներում)
 │   └── yerevan_budget.duckdb  արդյունքը (git-ում չէ. թողարկումներում)
@@ -122,7 +123,7 @@ duckdb -readonly data/yerevan_budget.duckdb -c "
 | [documents.md](docs/hy/documents.md) | յուրաքանչյուր տեսակի փաստաթղթի բովանդակությունը և աղյուսակների ճանաչումը |
 | [database.md](docs/hy/database.md) | բազայի նախագծումը. սկզբունքներ, սխեմա (ER), աղյուսակներ, դիտակներ, հարցումների օրինակներ |
 | [data_dictionary.md](docs/data_dictionary.md) | բոլոր աղյուսակները և սյուները (ավտոմատ, անգլերեն) |
-| [translations.md](docs/hy/translations.md) | անվանումներ երեք լեզվով. բառարաններ, մեթոդ, նոր անվանումների թարգմանում |
+| [translations.md](docs/hy/translations.md) | անվանումներ ինը լեզվով. լեզուներ, բառարաններ, մեթոդ, նոր անվանումների թարգմանում |
 | [data_quality.md](docs/hy/data_quality.md) | որակի ստուգումներ և հայտնի խնդիրներ |
 | [inventory.md](docs/hy/inventory.md) | փաստաթղթերի ցուցակ (ավտոմատ) |
 | [maintenance.md](docs/hy/maintenance.md) | թարմացում, նոր փաստաթղթեր, կայքի փոփոխություններ, կոդի կառուցվածք |
@@ -140,7 +141,7 @@ duckdb -readonly data/yerevan_budget.duckdb -c "
 | `v_summary` | ամփոփ ցուցանիշներ ըստ տարիների |
 | `fact_budget_line` | ստանդարտ ձևերի բոլոր գումարները («երկար» ձև) |
 | `fact_program_budget`, `fact_program_indicator` | ծրագրային բյուջեի բաշխում և արդյունքային ցուցանիշներ |
-| `dim_functional`, `dim_economic`, `dim_line`, `dim_program`, `dim_measure`, `dim_district`, `dim_label` | դասակարգիչներ և անվանումներ hy / en / ru |
+| `dim_functional`, `dim_economic`, `dim_line`, `dim_program`, `dim_measure`, `dim_district`, `dim_label` | դասակարգիչներ և անվանումներ hy և թարգմանության յուրաքանչյուր լեզվով (`*_en` … `*_fa`) |
 | `meta_document`, `meta_file` | փաստաթղթեր և ֆայլեր՝ ծագմամբ |
 | `raw_page_text`, `raw_table_cell`, `stg_table_row` | աղբյուրի տեքստը, բջիջները և աղյուսակների տողերը՝ առանց կորուստների |
 

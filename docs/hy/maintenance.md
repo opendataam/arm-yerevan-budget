@@ -76,7 +76,7 @@ make release            # նոր data-<հավաքագրման ամսաթիվ> թ
 | `parsers/semantics.py` | բաժիններ, տողերի տեսակներ, գումարների սյուների իմաստը |
 | `parsers/program_tables.py` | ծրագրային բյուջեի աղյուսակներ (ԾԲ) |
 | `parsers/common.py` | արժեքներ, կոդեր, անվանումներ |
-| `translations.py` | hy → en / ru բառարաններ |
+| `translations.py` | hy → en / ru / fr / es / pt / de / ar / fa բառարաններ |
 | `reference.py` | Երևանի վարչական շրջաններ |
 | `docs.py`, `release.py` | ավտոմատ փաստաթղթավորում, տվյալների պատկերներ GitHub թողարկումներում |
 | `cli.py`, `__main__.py` | հրամանային տող |

@@ -20,9 +20,10 @@
   запросу, не разбираются).
 
 Результат — база DuckDB `data/yerevan_budget.duckdb`: ≈530 000 сумм в «длинной» таблице фактов со смыслом каждого
-столбца (сценарий, год, период, часть бюджета), программный бюджет, классификаторы с **названиями на армянском,
-английском и русском**, полный текст каждой страницы и каждая ячейка таблиц источника, проверки качества и
-документация на трёх языках.
+столбца (сценарий, год, период, часть бюджета), программный бюджет, классификаторы с **названиями на армянском и
+восьми языках перевода** (английский, русский, французский, испанский, португальский, немецкий, арабский,
+персидский), полный текст каждой страницы и каждая ячейка таблиц источника, проверки качества и документация на трёх
+языках.
 
 ## Готовые данные: релизы
 
@@ -87,7 +88,7 @@ duckdb -readonly data/yerevan_budget.duckdb -c "
 │   ├── fetch.py               шаг 2: скачивание, распаковка архивов
 │   ├── extract.py             шаг 3: текст и таблицы PDF / XLS / XLSX / DOC / DOCX (старые шрифты, карты глифов)
 │   ├── build.py               шаг 4: сборка DuckDB
-│   ├── translations.py        словари hy -> en / ru (data/translations)
+│   ├── translations.py        словари hy -> en / ru / fr / es / pt / de / ar / fa (data/translations)
 │   ├── reference.py           районы Еревана
 │   ├── docs.py, release.py    генерируемая документация; снимки данных в релизах GitHub
 │   ├── cli.py, __main__.py    командная строка
@@ -99,7 +100,7 @@ duckdb -readonly data/yerevan_budget.duckdb -c "
 │   └── qc.sql                 проверки качества
 ├── data/
 │   ├── catalog/               манифесты (в git): pages.json, documents.json
-│   ├── translations/          словари переводов hy -> en / ru (в git) и GLOSSARY.md
+│   ├── translations/          словари переводов hy -> 8 языков (в git) и GLOSSARY.md
 │   ├── raw/                   скачанные страницы, документы, распакованные архивы (не в git; в релизах)
 │   ├── interim/               извлечённые текст и таблицы (не в git; в релизах)
 │   └── yerevan_budget.duckdb  результат (не в git; в релизах)
@@ -121,7 +122,7 @@ duckdb -readonly data/yerevan_budget.duckdb -c "
 | [documents.md](docs/ru/documents.md) | содержание каждого вида документов и как распознаются таблицы |
 | [database.md](docs/ru/database.md) | устройство базы: принципы, схема (ER), таблицы, представления, примеры запросов |
 | [data_dictionary.md](docs/data_dictionary.md) | все таблицы и столбцы (генерируется, на английском) |
-| [translations.md](docs/ru/translations.md) | названия на трёх языках: словари, метод, перевод новых названий |
+| [translations.md](docs/ru/translations.md) | названия на девяти языках: языки, словари, метод, перевод новых названий |
 | [data_quality.md](docs/ru/data_quality.md) | проверки качества и известные проблемы |
 | [inventory.md](docs/ru/inventory.md) | перечень документов (генерируется) |
 | [maintenance.md](docs/ru/maintenance.md) | обновление, новые документы, изменения сайта, структура кода |
@@ -139,7 +140,7 @@ duckdb -readonly data/yerevan_budget.duckdb -c "
 | `v_summary` | итоги по годам |
 | `fact_budget_line` | все суммы стандартных форм («длинная» форма) |
 | `fact_program_budget`, `fact_program_indicator` | распределение программного бюджета и показатели результативности |
-| `dim_functional`, `dim_economic`, `dim_line`, `dim_program`, `dim_measure`, `dim_district`, `dim_label` | классификаторы и названия на hy / en / ru |
+| `dim_functional`, `dim_economic`, `dim_line`, `dim_program`, `dim_measure`, `dim_district`, `dim_label` | классификаторы и названия на hy и каждом языке перевода (`*_en` … `*_fa`) |
 | `meta_document`, `meta_file` | документы и файлы с происхождением |
 | `raw_page_text`, `raw_table_cell`, `stg_table_row` | текст, ячейки и строки таблиц источника без потерь |
 

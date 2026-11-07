@@ -104,25 +104,35 @@ INSERT INTO qc_summary SELECT 'tables_with_unknown_layout', 'INFO', coalesce(sum
        'tables with numbers but without a row of column numbers (cells only in raw_table_cell; meta_file.n_unmapped_tables)'
 FROM meta_file;
 
--- 8. Names without a translation
+-- 8. Names without a translation (into any of the languages: the name columns <name>_<lang>)
+CREATE TEMP MACRO any_null(names) AS list_count(names) < len(names);
 CREATE TABLE qc_missing_translation AS
 SELECT DISTINCT l.context, l.label_hy AS hy
 FROM dim_label l
-JOIN (SELECT DISTINCT label_hy FROM v_budget_line WHERE label_en IS NULL OR label_ru IS NULL
-      UNION SELECT DISTINCT program_hy FROM v_budget_line WHERE program_hy IS NOT NULL AND program_en IS NULL) u
+JOIN (SELECT DISTINCT label_hy FROM v_budget_line WHERE any_null([*COLUMNS('^label_[a-z]{2}$')])
+      UNION SELECT DISTINCT program_hy FROM v_budget_line
+            WHERE program_hy IS NOT NULL AND any_null([*COLUMNS('^program_[a-z]{2}$')])) u
   USING (label_hy)
-WHERE l.label_en IS NULL OR l.label_ru IS NULL
-UNION SELECT 'program', name_hy FROM dim_program WHERE name_hy IS NOT NULL AND (name_en IS NULL OR name_ru IS NULL)
-UNION SELECT 'program', name_hy FROM dim_measure WHERE name_hy IS NOT NULL AND (name_en IS NULL OR name_ru IS NULL)
+WHERE any_null([*COLUMNS('^label_[a-z]{2}$')])
+UNION SELECT 'program', name_hy FROM dim_program WHERE name_hy IS NOT NULL AND any_null([*COLUMNS('^name_[a-z]{2}$')])
+UNION SELECT 'program', name_hy FROM dim_measure WHERE name_hy IS NOT NULL AND any_null([*COLUMNS('^name_[a-z]{2}$')])
 UNION SELECT CASE WHEN statement = 'revenue' THEN 'revenue' WHEN statement = 'expenditure_functional' THEN 'functional'
                   WHEN statement = 'expenditure_economic' THEN 'economic' ELSE 'financing' END, name_hy
-      FROM dim_line WHERE name_hy IS NOT NULL AND (name_en IS NULL OR name_ru IS NULL)
-UNION SELECT 'functional', name_hy FROM dim_functional WHERE name_hy IS NOT NULL AND (name_en IS NULL OR name_ru IS NULL)
-UNION SELECT 'economic', name_hy FROM dim_economic WHERE name_hy IS NOT NULL AND (name_en IS NULL OR name_ru IS NULL)
-UNION SELECT 'labels', title_hy FROM meta_document WHERE title_en IS NULL OR title_ru IS NULL
+      FROM dim_line WHERE name_hy IS NOT NULL AND any_null([*COLUMNS('^name_[a-z]{2}$')])
+UNION SELECT 'functional', name_hy FROM dim_functional WHERE name_hy IS NOT NULL AND any_null([*COLUMNS('^name_[a-z]{2}$')])
+UNION SELECT 'economic', name_hy FROM dim_economic WHERE name_hy IS NOT NULL AND any_null([*COLUMNS('^name_[a-z]{2}$')])
+UNION SELECT 'labels', title_hy FROM meta_document WHERE any_null([*COLUMNS('^title_[a-z]{2}$')])
 UNION SELECT 'labels', institution_group_hy FROM meta_document
-      WHERE institution_group_hy IS NOT NULL AND (institution_group_en IS NULL OR institution_group_ru IS NULL);
-COMMENT ON TABLE qc_missing_translation IS 'Armenian names without an English or Russian translation: names of codes (dimensions), document titles, and row names of the primary documents that have no code to fall back on (fill them with `python -m yerevan_budget translations`).';
+      WHERE institution_group_hy IS NOT NULL AND any_null([*COLUMNS('^institution_group_[a-z]{2}$')])
+UNION SELECT 'reference', name_hy FROM (
+      SELECT COLUMNS('^name_[a-z]{2}$') FROM dim_doc_type
+      UNION ALL BY NAME SELECT COLUMNS('^name_[a-z]{2}$') FROM dim_period
+      UNION ALL BY NAME SELECT COLUMNS('^name_[a-z]{2}$') FROM dim_statement
+      UNION ALL BY NAME SELECT COLUMNS('^name_[a-z]{2}$') FROM dim_scenario
+      UNION ALL BY NAME SELECT COLUMNS('^name_[a-z]{2}$') FROM dim_budget_part
+      UNION ALL BY NAME SELECT COLUMNS('^name_[a-z]{2}$') FROM dim_district)
+      WHERE any_null([*COLUMNS('^name_[a-z]{2}$')]);
+COMMENT ON TABLE qc_missing_translation IS 'Armenian names without a translation into one of the languages ({langs}): names of codes (dimensions), document titles, and row names of the primary documents that have no code to fall back on (fill them with `python -m yerevan_budget translations`).';
 INSERT INTO qc_summary SELECT 'translations_complete', CASE WHEN count(*) = 0 THEN 'OK' ELSE 'WARN' END, count(*),
        'names without a translation (qc_missing_translation)' FROM qc_missing_translation;
 

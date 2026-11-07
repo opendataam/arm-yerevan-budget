@@ -13,7 +13,7 @@ EXTRACTED_DIR = RAW_DIR / "extracted"    # content of rar / zip archives (<doc_i
 INSTITUTIONS_DIR = RAW_DIR / "institutions"  # optional: archives of municipal institutions
 INTERIM_DIR = DATA_DIR / "interim"       # extracted text and tables of every file (json.gz cache)
 CATALOG_DIR = DATA_DIR / "catalog"       # small JSON manifests (committed to git)
-TRANSLATIONS_DIR = DATA_DIR / "translations"  # hy -> en / ru dictionaries (committed to git)
+TRANSLATIONS_DIR = DATA_DIR / "translations"  # hy -> LANGS dictionaries (committed to git)
 SQL_DIR = ROOT / "sql"
 DUCKDB_PATH = DATA_DIR / "yerevan_budget.duckdb"
 RELEASE_DIR = DATA_DIR / "release"       # packed data snapshots (not in git)
@@ -23,6 +23,14 @@ GITHUB_REPO = "opendataam/arm-yerevan-budget"
 
 BASE_URL = "https://www.yerevan.am"
 LANG = "hy"  # the documents are published only in the Armenian version of the site
+
+# Languages of the names in the database. Armenian (hy) is the source; every name is translated into each
+# of LANGS (columns <name>_<lang> of the tables and views, columns of data/translations/*.csv).
+# English and Russian come first; French, Spanish, Portuguese, German, Arabic and Persian are the languages
+# of the largest communities of the Armenian diaspora.
+LANGS = ("en", "ru", "fr", "es", "pt", "de", "ar", "fa")
+LANG_NAMES = {"hy": "Armenian", "en": "English", "ru": "Russian", "fr": "French", "es": "Spanish",
+              "pt": "Portuguese", "de": "German", "ar": "Arabic", "fa": "Persian"}
 
 # The "Finance" section (https://www.yerevan.am/hy/finance/) and its sub pages.
 #   group "core"         – documents of the city budget (parsed into the database)
